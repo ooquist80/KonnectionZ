@@ -1,0 +1,64 @@
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+
+from app.api.deps import get_wordset_service
+from app.models.wordset import Wordset, WordsetNotFoundError, WordsetRegisteredInGameError
+from app.services.wordset import InvalidDifficultyError, WordsetService
+
+router = APIRouter(prefix="/wordsets", tags=["wordsets"])
+
+
+@router.post("", response_model=Wordset, status_code=status.HTTP_201_CREATED)
+def create_wordset(
+    payload: Wordset,
+    wordset_service: WordsetService = Depends(get_wordset_service),
+) -> Wordset:
+    try:
+        return wordset_service.create_wordset(payload)
+    except InvalidDifficultyError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+@router.get("", response_model=list[Wordset])
+def list_wordsets(wordset_service: WordsetService = Depends(get_wordset_service)) -> list[Wordset]:
+    return wordset_service.get_all_wordsets()
+
+
+@router.get("/{wordset_id}", response_model=Wordset)
+def get_wordset(
+    wordset_id: int,
+    wordset_service: WordsetService = Depends(get_wordset_service),
+) -> Wordset:
+    try:
+        return wordset_service.get_wordset(wordset_id)
+    except WordsetNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+
+@router.put("/{wordset_id}", response_model=Wordset)
+def update_wordset(
+    wordset_id: int,
+    payload: Wordset,
+    wordset_service: WordsetService = Depends(get_wordset_service),
+) -> Wordset:
+    try:
+        return wordset_service.update_wordset(wordset_id, payload)
+    except InvalidDifficultyError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except WordsetNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+
+@router.delete("/{wordset_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_wordset(
+    wordset_id: int,
+    wordset_service: WordsetService = Depends(get_wordset_service),
+) -> Response:
+    try:
+        wordset_service.delete_wordset(wordset_id)
+    except WordsetNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except WordsetRegisteredInGameError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+

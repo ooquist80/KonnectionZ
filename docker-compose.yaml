@@ -1,0 +1,7 @@
+services:
+  db:
+    image: mariadb:12.2.2
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
