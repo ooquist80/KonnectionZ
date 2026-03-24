@@ -1,11 +1,13 @@
 import datetime
-from pydantic import BaseModel, Field
 
-class GameNotFoundError(Exception):
-    pass
+from pydantic import BaseModel
+from app.models.wordset import Wordset
+
 
 class Game(BaseModel):
     id: int | None = None
-    date: datetime.datetime | None = datetime.datetime.now()
-    name: str = Field(title="The name of the game")
-    wordsets: list[int] = Field(min_length=4)
+    user_id: int
+    gameset_id: int
+    start_time: datetime.datetime | None = None
+    end_time: datetime.datetime | None = None
+    wordsets: list[Wordset] = []

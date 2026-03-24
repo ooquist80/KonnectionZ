@@ -1,3 +1,5 @@
+from pymysql.cursors import DictCursor
+
 from app.models.wordset import Wordset, WordsetRegisteredInGameError, WordsetNotFoundError
 from app.db.client import DatabaseClient
 
@@ -8,7 +10,7 @@ class WordsetRepository:
 
     def create(self, *, category: str, difficulty: int, words: list[str]) -> Wordset:
         with self.database_client.connect() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     INSERT INTO wordsets (category, difficulty)
@@ -30,7 +32,7 @@ class WordsetRepository:
 
     def get_by_id(self, wordset_id: int) -> Wordset | None:
         with self.database_client.connect() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     SELECT
@@ -65,7 +67,7 @@ class WordsetRepository:
 
     def get_all(self) -> list[Wordset]:
         with self.database_client.connect() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     SELECT
@@ -109,7 +111,7 @@ class WordsetRepository:
 
     def delete(self, wordset_id: int) -> bool:
         with self.database_client.connect() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     SELECT game_id FROM games_wordsets
@@ -146,7 +148,7 @@ class WordsetRepository:
 
     def difficulty_exists(self, difficulty_id: int) -> bool:
         with self.database_client.connect() as connection:
-            with connection.cursor() as cursor:
+            with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     SELECT 1
