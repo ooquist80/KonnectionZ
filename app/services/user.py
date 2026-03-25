@@ -1,12 +1,13 @@
 from app.repositories.user import UserRepository
 from app.models.user import User, UserNotFoundError
+from app.db.client import DatabaseClient
 import bcrypt
 
 
 class UserService:
 
-    def __init__(self, user_repository: UserRepository) -> None:
-        self.user_repository = user_repository
+    def __init__(self, database_client : DatabaseClient) -> None:
+        self.user_repository = UserRepository(database_client)
 
     def create_user(self, payload: User) -> User:
         salt = bcrypt.gensalt()

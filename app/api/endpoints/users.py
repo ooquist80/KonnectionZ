@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_404_NOT_FOUND
 
-from app.api.deps import get_user_service
+from app.api.deps import get_database_client
+from app.db.client import DatabaseClient
 from app.models.user import User, UserNotFoundError
 from app.services.user import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+def get_user_service(database_client: DatabaseClient = Depends(get_database_client)) -> UserService:
+    return UserService(database_client)
 
 @router.post("", response_model=User, status_code=status.HTTP_201_CREATED)
 def create_user(payload: User, user_service: UserService = Depends(get_user_service)) -> User:

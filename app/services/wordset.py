@@ -1,15 +1,15 @@
 from app.repositories.wordset import WordsetRepository
 from app.models.wordset import Wordset, WordsetNotFoundError
-
-
+from app.db.client import DatabaseClient
 
 
 class InvalidDifficultyError(Exception):
     pass
 
 class WordsetService:
-    def __init__(self, wordset_repository: WordsetRepository) -> None:
-        self.wordset_repository = wordset_repository
+
+    def __init__(self, database_client: DatabaseClient) -> None:
+        self.wordset_repository = WordsetRepository(database_client)
 
     def create_wordset(self, payload: Wordset) -> Wordset:
         self._ensure_valid_difficulty(payload.difficulty)

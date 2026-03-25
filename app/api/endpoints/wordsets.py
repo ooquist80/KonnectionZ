@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from app.api.deps import get_wordset_service
+from app.api.deps import get_database_client
+from app.db.client import DatabaseClient
 from app.models.wordset import Wordset, WordsetNotFoundError, WordsetRegisteredInGameError
 from app.services.wordset import InvalidDifficultyError, WordsetService
 
 router = APIRouter(prefix="/wordsets", tags=["wordsets"])
 
+def get_wordset_service(database_client: DatabaseClient = Depends(get_database_client)) -> WordsetService:
+    return WordsetService(database_client)
 
 @router.post("", response_model=Wordset, status_code=status.HTTP_201_CREATED)
 def create_wordset(

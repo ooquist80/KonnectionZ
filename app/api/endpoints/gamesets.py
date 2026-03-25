@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_404_NOT_FOUND
 
-from app.api.deps import get_gameset_service
+from app.api.deps import get_database_client
+from app.db.client import DatabaseClient
 from app.models.gameset import GameSet
 from app.services.gameset import GameSetService, GameSetNotFoundError
 
 router = APIRouter(prefix="/gamesets", tags=["gamesets"])
+
+def get_gameset_service(database_client: DatabaseClient = Depends(get_database_client)) -> GameSetService:
+    return GameSetService(database_client)
 
 @router.post("/", response_model=GameSet, status_code=status.HTTP_201_CREATED)
 def create_gameset(payload: GameSet, gameset_service: GameSetService = Depends(get_gameset_service)) -> GameSet:
