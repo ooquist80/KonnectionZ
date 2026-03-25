@@ -35,11 +35,10 @@ class WordsetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT
-                        w.id,
-                        w.category,
-                        w.difficulty
-                    FROM wordsets w                    
+                    SELECT w.id,
+                           w.category,
+                           w.difficulty
+                    FROM wordsets w
                     WHERE w.id = %s
                     """,
                     (wordset_id,)
@@ -51,29 +50,26 @@ class WordsetRepository:
 
                 cursor.execute(
                     """
-                    SELECT
-                        w.word
+                    SELECT w.word
                     FROM words w
-                    WHERE w.wordset_id = %s;                        
+                    WHERE w.wordset_id = %s;
                     """,
                     (wordset_id,)
                 )
                 word_rows = cursor.fetchall()
-                words=[word_row["word"] for word_row in word_rows]
+                words = [word_row["word"] for word_row in word_rows]
 
-                return Wordset(id = wordset_row["id"], category = wordset_row["category"],
-                               difficulty = wordset_row["difficulty"], words = words)
-
+                return Wordset(id=wordset_row["id"], category=wordset_row["category"],
+                               difficulty=wordset_row["difficulty"], words=words)
 
     def get_all(self) -> list[Wordset]:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT
-                        id,
-                        category,
-                        difficulty                        
+                    SELECT id,
+                           category,
+                           difficulty
                     FROM wordsets;
                     """
                 )
@@ -103,18 +99,18 @@ class WordsetRepository:
                         category=wordset_row["category"],
                         difficulty=wordset_row["difficulty"],
                         words=word_dict.get(wordset_row["id"], [])
-                        )
+                    )
                     )
 
         return result
-
 
     def delete(self, wordset_id: int) -> bool:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT game_id FROM games_wordsets
+                    SELECT game_id
+                    FROM games_wordsets
                     WHERE wordset_id = %s;
                     """,
                     (wordset_id,)
@@ -124,14 +120,16 @@ class WordsetRepository:
                     raise WordsetRegisteredInGameError()
                 cursor.execute(
                     """
-                    DELETE FROM words
+                    DELETE
+                    FROM words
                     WHERE wordset_id = %s;
                     """,
                     (wordset_id,),
                 )
                 cursor.execute(
                     """
-                    DELETE FROM wordsets
+                    DELETE
+                    FROM wordsets
                     WHERE id = %s;
                     """,
                     (wordset_id,),

@@ -7,13 +7,15 @@ from app.services.wordset import InvalidDifficultyError, WordsetService
 
 router = APIRouter(prefix="/wordsets", tags=["wordsets"])
 
+
 def get_wordset_service(database_client: DatabaseClient = Depends(get_database_client)) -> WordsetService:
     return WordsetService(database_client)
 
+
 @router.post("", response_model=Wordset, status_code=status.HTTP_201_CREATED)
 def create_wordset(
-    payload: Wordset,
-    wordset_service: WordsetService = Depends(get_wordset_service),
+        payload: Wordset,
+        wordset_service: WordsetService = Depends(get_wordset_service),
 ) -> Wordset:
     try:
         return wordset_service.create_wordset(payload)
@@ -28,8 +30,8 @@ def list_wordsets(wordset_service: WordsetService = Depends(get_wordset_service)
 
 @router.get("/{wordset_id}", response_model=Wordset)
 def get_wordset(
-    wordset_id: int,
-    wordset_service: WordsetService = Depends(get_wordset_service),
+        wordset_id: int,
+        wordset_service: WordsetService = Depends(get_wordset_service),
 ) -> Wordset:
     try:
         return wordset_service.get_wordset(wordset_id)
@@ -39,9 +41,9 @@ def get_wordset(
 
 @router.put("/{wordset_id}", response_model=Wordset)
 def update_wordset(
-    wordset_id: int,
-    payload: Wordset,
-    wordset_service: WordsetService = Depends(get_wordset_service),
+        wordset_id: int,
+        payload: Wordset,
+        wordset_service: WordsetService = Depends(get_wordset_service),
 ) -> Wordset:
     try:
         return wordset_service.update_wordset(wordset_id, payload)
@@ -53,8 +55,8 @@ def update_wordset(
 
 @router.delete("/{wordset_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_wordset(
-    wordset_id: int,
-    wordset_service: WordsetService = Depends(get_wordset_service),
+        wordset_id: int,
+        wordset_service: WordsetService = Depends(get_wordset_service),
 ) -> Response:
     try:
         wordset_service.delete_wordset(wordset_id)
@@ -64,4 +66,3 @@ def delete_wordset(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-

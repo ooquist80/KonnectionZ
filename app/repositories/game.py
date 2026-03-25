@@ -3,6 +3,7 @@ from datetime import datetime
 from app.models.game import Game
 from app.db.client import DatabaseClient
 
+
 class GameRepository:
 
     def __init__(self, database_client: DatabaseClient) -> None:
@@ -13,7 +14,8 @@ class GameRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO games (user_id, gameset_id, start_time) VALUES (%s, %s, %s)                        
+                    INSERT INTO games (user_id, gameset_id, start_time)
+                    VALUES (%s, %s, %s)
                     """,
                     (user_id, gameset_id, start_time)
                 )
@@ -26,7 +28,9 @@ class GameRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, user_id, gameset_id, start_time, end_time, completed_wordsets FROM games WHERE id = %s 
+                    SELECT id, user_id, gameset_id, start_time, end_time, completed_wordsets
+                    FROM games
+                    WHERE id = %s
                     """, (game_id,)
                 )
                 game_row = cursor.fetchone()
@@ -39,7 +43,3 @@ class GameRepository:
         return Game(id=game_row["id"], user_id=game_row["user_id"], gameset_id=game_row["gameset_id"],
                     start_time=game_row["start_time"], end_time=game_row["end_time"],
                     completed_wordsets=completed_wordsets)
-
-
-
-

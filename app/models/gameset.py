@@ -1,8 +1,10 @@
 import datetime
 from pydantic import BaseModel, Field
 
+
 class GameSetNotFoundError(Exception):
     pass
+
 
 class GameSet(BaseModel):
     id: int | None = None

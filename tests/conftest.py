@@ -109,4 +109,3 @@ def client(monkeypatch):
 
     app.dependency_overrides.clear()
     get_settings.cache_clear()
-

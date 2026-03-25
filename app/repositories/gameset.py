@@ -15,7 +15,8 @@ class GameSetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO gamesets (date, name) VALUES (%s, %s)                        
+                    INSERT INTO gamesets (date, name)
+                    VALUES (%s, %s)
                     """,
                     (date, name)
                 )
@@ -23,7 +24,8 @@ class GameSetRepository:
                 data = [(game_id, wordset) for wordset in wordsets]
                 cursor.executemany(
                     """
-                    INSERT INTO gamesets_wordsets (gameset_id, wordset_id) VALUES (%s, %s)
+                    INSERT INTO gamesets_wordsets (gameset_id, wordset_id)
+                    VALUES (%s, %s)
                     """,
                     data
                 )
@@ -35,7 +37,9 @@ class GameSetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, name, `date` FROM gamesets WHERE id = %s
+                    SELECT id, name, `date`
+                    FROM gamesets
+                    WHERE id = %s
                     """,
                     (game_id,),
                 )
@@ -45,7 +49,9 @@ class GameSetRepository:
                     return None
                 cursor.execute(
                     """
-                    SELECT wordset_id FROM gamesets_wordsets WHERE gameset_id = %s
+                    SELECT wordset_id
+                    FROM gamesets_wordsets
+                    WHERE gameset_id = %s
                     """,
                     (game_id,),
                 )
@@ -60,7 +66,9 @@ class GameSetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    DELETE FROM games WHERE id = %s
+                    DELETE
+                    FROM games
+                    WHERE id = %s
                     """,
                     (game_id,),
                 )
@@ -72,5 +80,3 @@ class GameSetRepository:
             else:
                 connection.rollback()
                 raise GameSetNotFoundError(game_id)
-
-

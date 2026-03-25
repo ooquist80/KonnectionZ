@@ -32,4 +32,3 @@ def get_settings() -> Settings:
         database_name=os.getenv("DB_NAME", "konnectionz"),
         skip_db_init=_as_bool(os.getenv("SKIP_DB_INIT")),
     )
-

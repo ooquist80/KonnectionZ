@@ -6,6 +6,7 @@ from app.db.client import DatabaseClient
 class InvalidDifficultyError(Exception):
     pass
 
+
 class WordsetService:
 
     def __init__(self, database_client: DatabaseClient) -> None:
@@ -38,4 +39,3 @@ class WordsetService:
     def _ensure_valid_difficulty(self, difficulty_id: int) -> None:
         if not self.wordset_repository.difficulty_exists(difficulty_id):
             raise InvalidDifficultyError(f"Difficulty with id '{difficulty_id}' was not found.")
-

@@ -8,12 +8,15 @@ from app.services.user import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+
 def get_user_service(database_client: DatabaseClient = Depends(get_database_client)) -> UserService:
     return UserService(database_client)
+
 
 @router.post("", response_model=User, status_code=status.HTTP_201_CREATED)
 def create_user(payload: User, user_service: UserService = Depends(get_user_service)) -> User:
     return user_service.create_user(payload)
+
 
 @router.get("/{user_id}", response_model=User, status_code=status.HTTP_200_OK)
 def get_user(user_id: int, user_service: UserService = Depends(get_user_service)) -> User:

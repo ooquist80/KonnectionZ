@@ -3,6 +3,7 @@ from pymysql.cursors import DictCursor
 from app.models.user import User
 from app.db.client import DatabaseClient
 
+
 class UserRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
@@ -12,7 +13,8 @@ class UserRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO users (email, username, password) VALUES (%s, %s, %s)
+                    INSERT INTO users (email, username, password)
+                    VALUES (%s, %s, %s)
                     """,
                     (email, username, password)
                 )
@@ -25,7 +27,9 @@ class UserRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, email, username FROM users WHERE id = %s
+                    SELECT id, email, username
+                    FROM users
+                    WHERE id = %s
                     """,
                     (user_id,)
                 )

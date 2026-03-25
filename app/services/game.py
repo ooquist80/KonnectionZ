@@ -3,6 +3,7 @@ from app.models.game import Game, GameNotFoundError
 from app.db.client import DatabaseClient
 from datetime import datetime
 
+
 class GameService:
 
     def __init__(self, database_client: DatabaseClient) -> None:
@@ -19,7 +20,6 @@ class GameService:
         if game is None:
             raise GameNotFoundError(f"Game with id: {game_id} was not found.")
         return game
-
 
     def play_words(self, game_id, payload):
         pass

@@ -2,8 +2,10 @@ import datetime
 
 from pydantic import BaseModel
 
+
 class GameNotFoundError(Exception):
     pass
+
 
 class Game(BaseModel):
     id: int | None = None

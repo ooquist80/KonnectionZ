@@ -9,7 +9,8 @@ class GameSetService:
         self.gameset_repository = GameSetRepository(database_client)
 
     def create_gameset(self, payload: GameSet) -> GameSet:
-        created_gameset = self.gameset_repository.create(name=payload.name, date=payload.date, wordsets=payload.wordsets )
+        created_gameset = self.gameset_repository.create(name=payload.name, date=payload.date,
+                                                         wordsets=payload.wordsets)
         return created_gameset
 
     def get_gameset(self, gameset_id: int) -> GameSet:

@@ -60,4 +60,3 @@ class DatabaseClient:
             statements.append("\n".join(current_lines))
 
         return statements
-
