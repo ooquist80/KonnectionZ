@@ -11,7 +11,7 @@ http:
     data: |-
       {
         "user_id": 1,
-        "gameset_id": 1
+        "gameset_id": 321321
       }
   auth: inherit
 

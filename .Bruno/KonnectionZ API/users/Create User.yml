@@ -11,11 +11,10 @@ http:
   body:
     type: json
     data: |-
-      {
-        "id": "",
-        "email": "",
-        "username": "",
-        "password": ""
+      {  
+        "email": "olle.oquist@gmail.com",
+        "username": "ooquist",
+        "password": "fasdfsdf"
       }
   auth: inherit
 
