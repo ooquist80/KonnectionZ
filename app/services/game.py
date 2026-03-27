@@ -1,14 +1,13 @@
-from app.models.wordset import WordsetNotFoundError
-from app.repositories.game import GameRepository
-from app.repositories.wordset import WordsetRepository
-from app.repositories.user import UserRepository
-from app.repositories.gameset import GameSetRepository
-from app.repositories.game import Wordset
-from app.models.game import GameRead, GameNotFoundError, Resultmessage
-from app.models.user import User, UserNotFoundError
-from app.models.gameset import GameSet, GameSetNotFoundError
-from app.db.client import DatabaseClient
 from datetime import datetime
+
+from app.db.client import DatabaseClient
+from app.models.game import GameRead, GameNotFoundError, Resultmessage, GameWrite
+from app.models.gameset import GameSetNotFoundError
+from app.models.user import UserNotFoundError
+from app.repositories.game import GameRepository
+from app.repositories.gameset import GameSetRepository
+from app.repositories.user import UserRepository
+from app.repositories.wordset import WordsetRepository
 
 
 class GameService:
@@ -19,17 +18,15 @@ class GameService:
         self.gameset_repository = GameSetRepository(database_client)
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create_game(self, payload) -> GameRead:
-        start_time = datetime.now()
-        user = self.user_repository.get_by_id(user_id= payload.user_id)
+    def create_game(self, game_write : GameWrite) -> GameRead:
+        user = self.user_repository.get_by_id(user_id=game_write.user_id)
         if user is None:
-            raise UserNotFoundError(f"User with id: {payload.user_id} was not found.")
-        gameset = self.gameset_repository.get_by_id(payload.gameset_id)
+            raise UserNotFoundError(f"User with id: {game_write.user_id} was not found.")
+        gameset = self.gameset_repository.get_by_id(game_write.gameset_id)
         if gameset is None:
-            raise GameSetNotFoundError(f"Gameset with id: {payload.gameset_id} was not found.")
+            raise GameSetNotFoundError(f"Gameset with id: {game_write.gameset_id} was not found.")
 
-        created_game = self.game_repository.create(user_id=payload.user_id, gameset_id=payload.gameset_id,
-                                                   start_time=start_time)
+        created_game = self.game_repository.create(game_write)
         return created_game
 
     def get_game(self, game_id: int) -> GameRead:

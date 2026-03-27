@@ -6,8 +6,13 @@ class GameSetNotFoundError(Exception):
     pass
 
 
-class GameSet(BaseModel):
+class GameSetRead(BaseModel):
     id: int | None = None
-    date: datetime.datetime | None = datetime.datetime.now()
+    date: datetime.datetime
+    name: str = Field(title="The name of the game")
+    wordsets: list[int] = Field(min_length=4)
+
+class GameSetWrite(BaseModel):
+    date: datetime.datetime = datetime.datetime.now()
     name: str = Field(title="The name of the game")
     wordsets: list[int] = Field(min_length=4)

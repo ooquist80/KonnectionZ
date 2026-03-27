@@ -5,8 +5,12 @@ class UserNotFoundError(Exception):
     pass
 
 
-class User(BaseModel):
-    id: int | None = None
+class UserRead(BaseModel):
+    id: int
     email: str
     username: str
-    password: str | None = None
+
+class UserWrite(BaseModel):
+    email: str
+    username: str
+    password: str

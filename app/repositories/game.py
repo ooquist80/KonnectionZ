@@ -1,7 +1,7 @@
 from pymysql.cursors import DictCursor
 from datetime import datetime
-from app.models.game import GameRead, GameCreate, GameRecord
-from app.models.wordset import Wordset
+from app.models.game import GameRead, GameWrite, GameRecord
+from app.models.wordset import WordsetRead
 from app.db.client import DatabaseClient
 
 
@@ -10,7 +10,7 @@ class GameRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
 
-    def create(self, user_id: int, gameset_id: int, start_time: datetime) -> GameRead:
+    def create(self, game_write : GameWrite) -> GameRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -18,11 +18,12 @@ class GameRepository:
                     INSERT INTO games (user_id, gameset_id, start_time)
                     VALUES (%s, %s, %s)
                     """,
-                    (user_id, gameset_id, start_time)
+                    (game_write.user_id, game_write.gameset_id, game_write.start_time)
                 )
                 game_id = cursor.lastrowid
             connection.commit()
-        return GameRead(id=game_id, user_id=user_id, gameset_id=gameset_id, start_time=start_time)
+        return GameRead(id=game_id, user_id=game_write.user_id, gameset_id=game_write.gameset_id,
+                        start_time=game_write.start_time)
 
     def get_by_id(self, game_id) -> GameRecord | None:
         with self.database_client.connect() as connection:
@@ -49,17 +50,13 @@ class GameRepository:
                 for wordset_row in wordset_rows:
                     completed_wordset_ids.append(wordset_row["wordset_id"])
                 completed_wordset_ids = list(set(completed_wordset_ids))
-                return GameRecord(id=game_id,
-                                  user_id=game_row["user_id"],
-                                  gameset_id=game_row["gameset_id"],
-                                  start_time=game_row["start_time"],
-                                  end_time=game_row["end_time"],
-                                  completed_wordset_ids=completed_wordset_ids)
+        return GameRecord(id=game_id,
+                          user_id=game_row["user_id"],
+                          gameset_id=game_row["gameset_id"],
+                          start_time=game_row["start_time"],
+                          end_time=game_row["end_time"],
+                          completed_wordset_ids=completed_wordset_ids)
 
-
-
-        return GameRecord(id=game_row["id"], user_id=game_row["user_id"], gameset_id=game_row["gameset_id"],
-                    start_time=game_row["start_time"], end_time=game_row["end_time"], completed_wordset_ids=completed_wordset_ids)
 
     def get_all(self) -> list[GameRecord]:
         with self.database_client.connect() as connection:

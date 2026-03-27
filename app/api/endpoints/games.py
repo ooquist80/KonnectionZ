@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.db.client import DatabaseClient
-from app.models.game import GameRead, GameCreate, GameNotFoundError, PlayResult, Resultmessage
+from app.models.game import GameRead, GameWrite, GameNotFoundError, PlayResult, Resultmessage
 from app.models.user import UserNotFoundError
 from app.models.gameset import GameSetNotFoundError
 from app.services.game import GameService
@@ -16,7 +16,7 @@ def get_game_service(database_client: DatabaseClient = Depends(get_database_clie
 
 
 @router.post("/", response_model=GameRead, status_code=status.HTTP_201_CREATED)
-def create_game(payload: GameCreate, game_service: GameService = Depends(get_game_service)) -> GameRead:
+def create_game(payload: GameWrite, game_service: GameService = Depends(get_game_service)) -> GameRead:
     try:
         return game_service.create_game(payload)
     except UserNotFoundError as exception:

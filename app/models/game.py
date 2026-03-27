@@ -2,7 +2,7 @@ import datetime
 from enum import Enum
 
 from pydantic import BaseModel
-from app.models.wordset import Wordset
+from app.models.wordset import WordsetRead
 
 
 class GameNotFoundError(Exception):
@@ -15,9 +15,9 @@ class GameRead(BaseModel):
     gameset_id: int
     start_time: datetime.datetime | None = None
     end_time: datetime.datetime | None = None
-    completed_wordsets: list[Wordset] | None = None
+    completed_wordsets: list[WordsetRead] | None = None
 
-class GameCreate(BaseModel):
+class GameWrite(BaseModel):
     user_id: int
     gameset_id: int
     start_time: datetime.datetime | None = None

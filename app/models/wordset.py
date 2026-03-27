@@ -9,8 +9,13 @@ class WordsetNotFoundError(Exception):
     pass
 
 
-class Wordset(BaseModel):
+class WordsetRead(BaseModel):
     id: int | None = None
+    category: str
+    difficulty: int
+    words: list[str] = Field(min_length=4)
+
+class WordsetWrite(BaseModel):
     category: str
     difficulty: int
     words: list[str] = Field(min_length=4)

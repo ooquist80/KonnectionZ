@@ -12,10 +12,9 @@ http:
     type: json
     data: |-
       {
-        "id": "",
-        "category": "",
+        "category": "devops",
         "difficulty": 0,
-        "words": []
+        "words": ["Ansible", "Kubernetes", "ArgoCD", "Jenkins"]
       }
   auth: inherit
 

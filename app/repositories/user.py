@@ -1,6 +1,6 @@
 from pymysql.cursors import DictCursor
 
-from app.models.user import User
+from app.models.user import UserRead, UserWrite
 from app.db.client import DatabaseClient
 
 
@@ -8,7 +8,7 @@ class UserRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
 
-    def create(self, email: str, username: str, password: str) -> User:
+    def create(self, user_write : UserWrite, hashed_password: bytes) -> UserRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -16,13 +16,13 @@ class UserRepository:
                     INSERT INTO users (email, username, password)
                     VALUES (%s, %s, %s)
                     """,
-                    (email, username, password)
+                    (user_write.email, user_write.username, hashed_password)
                 )
                 user_id = cursor.lastrowid
             connection.commit()
-        return User(id=user_id, email=email, username=username)
+        return UserRead(id=user_id, email=user_write.email, username=user_write.username)
 
-    def get_by_id(self, user_id: int) -> User | None:
+    def get_by_id(self, user_id: int) -> UserRead | None:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -37,4 +37,4 @@ class UserRepository:
 
         if user_row is None:
             return None
-        return User(id=user_row["id"], email=user_row["email"], username=user_row["username"])
+        return UserRead(id=user_row["id"], email=user_row["email"], username=user_row["username"])
