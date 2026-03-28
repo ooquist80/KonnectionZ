@@ -10,16 +10,15 @@ http:
   url: "{{baseUrl}}/wordsets/:wordset_id"
   params:
     - name: wordset_id
-      value: ""
+      value: "1005"
       type: path
   body:
     type: json
     data: |-
-      {
-        "id": "",
-        "category": "",
-        "difficulty": 0,
-        "words": []
+      {  
+        "category": "Devops Tools",
+        "difficulty": 1,
+        "words": ["Ansible", "Kubernetes", "ArgoCD", "Jenkins"]
       }
   auth: inherit
 
