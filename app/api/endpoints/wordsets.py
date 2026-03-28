@@ -2,8 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.api.deps import get_database_client
 from app.db.client import DatabaseClient
-from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetRegisteredInGameError, WordsetCreate, \
-    WordsetUpdate
+from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetRegisteredInGameError, WordsetWrite
 from app.services.wordset import InvalidDifficultyError, WordsetService
 
 router = APIRouter(prefix="/wordsets", tags=["wordsets"])
@@ -15,7 +14,7 @@ def get_wordset_service(database_client: DatabaseClient = Depends(get_database_c
 
 @router.post("", response_model=WordsetRead, status_code=status.HTTP_201_CREATED)
 def create_wordset(
-        payload: WordsetCreate, wordset_service: WordsetService = Depends(get_wordset_service)) -> WordsetRead:
+        payload: WordsetWrite, wordset_service: WordsetService = Depends(get_wordset_service)) -> WordsetRead:
     try:
         return wordset_service.create_wordset(payload)
     except InvalidDifficultyError as exc:
@@ -41,7 +40,7 @@ def get_wordset(
 @router.put("/{wordset_id}", response_model=WordsetRead)
 def update_wordset(
         wordset_id: int,
-        payload: WordsetUpdate,
+        payload: WordsetWrite,
         wordset_service: WordsetService = Depends(get_wordset_service),
 ) -> WordsetRead:
     try:

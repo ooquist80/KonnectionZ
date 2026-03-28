@@ -15,12 +15,7 @@ class WordsetRead(BaseModel):
     difficulty: int
     words: list[str] = Field(min_length=4)
 
-class WordsetCreate(BaseModel):
-    category: str
-    difficulty: int
-    words: list[str] = Field(min_length=4)
-
-class WordsetUpdate(BaseModel):
+class WordsetWrite(BaseModel):
     category: str
     difficulty: int
     words: list[str] = Field(min_length=4)

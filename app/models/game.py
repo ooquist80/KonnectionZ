@@ -8,6 +8,8 @@ from app.models.wordset import WordsetRead
 class GameNotFoundError(Exception):
     pass
 
+class GameAlreadyCompletedError(Exception):
+    pass
 
 class GameRead(BaseModel):
     id: int | None = None
@@ -31,12 +33,12 @@ class GameRecord(BaseModel):
     end_time: datetime.datetime | None = None
     completed_wordset_ids: list[int]
 
-class Resultmessage(str, Enum):
+class ResultMessage(str, Enum):
     COMPLETED = "Congratulations! You have completed the game."
     CORRECT = "Correct!"
-    THREE_CORRECT = "Almost! Three out of four words are correct."
+    ALMOST_CORRECT = "Almost! Only one word is not correct."
     INCORRECT = "Incorrect! Try again."
 
 class PlayResult(BaseModel):
     game: GameRead
-    result: Resultmessage
+    result_message: ResultMessage

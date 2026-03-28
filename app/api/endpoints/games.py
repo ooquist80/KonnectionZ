@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.db.client import DatabaseClient
-from app.models.game import GameRead, GameWrite, GameNotFoundError, PlayResult, Resultmessage
+from app.models.game import GameRead, GameWrite, GameNotFoundError, PlayResult, ResultMessage, GameAlreadyCompletedError
 from app.models.user import UserNotFoundError
 from app.models.gameset import GameSetNotFoundError
 from app.services.game import GameService
@@ -44,12 +44,16 @@ def play_words(game_id: int, payload: list[str], game_service: GameService = Dep
         game = game_service.get_game(game_id)
     except GameNotFoundError as exception:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
-    result = game_service.play_words(game, payload)
 
-    if result == Resultmessage.CORRECT:
+    try:
+        result_message = game_service.play_words(game, payload)
+    except GameAlreadyCompletedError as exception:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(exception)) from exception
+
+    if result_message == ResultMessage.CORRECT or result_message == ResultMessage.COMPLETED:
         game = game_service.get_game(game_id)
-        return PlayResult(game=game, result=result)
+        return PlayResult(game=game, result_message=result_message)
     else:
-        return PlayResult(game=game, result=result)
+        return PlayResult(game=game, result_message=result_message)
 
 

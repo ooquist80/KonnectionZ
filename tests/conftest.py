@@ -5,7 +5,7 @@ from app.api.deps import get_user_service, get_wordset_service
 from app.core.config import get_settings
 from app.main import create_app
 from app.models.user import UserCreate, UserRead
-from app.models.wordset import WordsetCreate, WordsetRead, WordsetUpdate
+from app.models.wordset import WordsetWrite, WordsetRead, WordsetUpdate
 from app.services.user import UserAlreadyExistsError, UserNotFoundError
 from app.services.wordset import InvalidDifficultyError, WordsetNotFoundError
 
@@ -41,7 +41,7 @@ class FakeWordsetService:
         self._next_id = 1
         self._difficulty_ids = {1, 2, 3}
 
-    def create_wordset(self, payload: WordsetCreate) -> WordsetRead:
+    def create_wordset(self, payload: WordsetWrite) -> WordsetRead:
         self._ensure_valid_difficulty(payload.difficulty)
 
         wordset = WordsetRead(

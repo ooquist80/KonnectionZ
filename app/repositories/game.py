@@ -104,7 +104,17 @@ class GameRepository:
             connection.commit()
 
     def add_game_end_time(self, game_id, end_time):
-        pass
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute(
+                    """
+                    UPDATE games
+                    SET end_time = %s
+                    WHERE id = %s
+                    """,
+                    (end_time, game_id)
+                )
+            connection.commit()
 
 
 

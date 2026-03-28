@@ -1,5 +1,5 @@
 from app.db.client import DatabaseClient
-from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetCreate, WordsetUpdate
+from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetWrite
 from app.repositories.wordset import WordsetRepository
 
 
@@ -12,7 +12,7 @@ class WordsetService:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create_wordset(self, wordset_write: WordsetCreate) -> WordsetRead:
+    def create_wordset(self, wordset_write: WordsetWrite) -> WordsetRead:
         self._ensure_valid_difficulty(wordset_write.difficulty)
         created_wordset = self.wordset_repository.create(wordset_write)
         return created_wordset
@@ -36,6 +36,6 @@ class WordsetService:
         if not self.wordset_repository.difficulty_exists(difficulty_id):
             raise InvalidDifficultyError(f"Difficulty with id '{difficulty_id}' was not found.")
 
-    def update_wordset(self, wordset_id, wordset_update: WordsetUpdate) -> WordsetRead:
+    def update_wordset(self, wordset_id, wordset_update: WordsetWrite) -> WordsetRead:
         self._ensure_valid_difficulty(wordset_update.difficulty)
         return self.wordset_repository.update(wordset_id, wordset_update)

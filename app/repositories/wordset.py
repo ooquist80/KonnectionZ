@@ -1,7 +1,6 @@
 from pymysql.cursors import DictCursor
 
-from app.models.wordset import WordsetRead, WordsetRegisteredInGameError, WordsetNotFoundError, WordsetCreate, \
-    WordsetUpdate
+from app.models.wordset import WordsetRead, WordsetRegisteredInGameError, WordsetNotFoundError, WordsetWrite
 from app.db.client import DatabaseClient
 
 
@@ -9,7 +8,7 @@ class WordsetRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
 
-    def create(self, wordset_write : WordsetCreate) -> WordsetRead:
+    def create(self, wordset_write : WordsetWrite) -> WordsetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -160,7 +159,7 @@ class WordsetRepository:
 
         return row is not None
 
-    def update(self, wordset_id: int, wordset_update: WordsetUpdate) -> WordsetRead:
+    def update(self, wordset_id: int, wordset_write: WordsetWrite) -> WordsetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 # rowcount can be 0 when values are unchanged, so verify existence explicitly
@@ -182,7 +181,7 @@ class WordsetRepository:
                     SET category = %s, difficulty = %s
                     WHERE id = %s;
                     """,
-                    (wordset_update.category, wordset_update.difficulty, wordset_id),
+                    (wordset_write.category, wordset_write.difficulty, wordset_id),
                 )
 
                 cursor.execute(
@@ -197,7 +196,7 @@ class WordsetRepository:
                 word_rows = cursor.fetchall()
 
                 existing_count = len(word_rows)
-                incoming_count = len(wordset_update.words)
+                incoming_count = len(wordset_write.words)
                 overlap_count = min(existing_count, incoming_count)
 
                 if overlap_count > 0:
@@ -208,7 +207,7 @@ class WordsetRepository:
                         WHERE id = %s;
                         """,
                         [
-                            (wordset_update.words[index], word_rows[index]["id"])
+                            (wordset_write.words[index], word_rows[index]["id"])
                             for index in range(overlap_count)
                         ],
                     )
@@ -219,7 +218,7 @@ class WordsetRepository:
                         INSERT INTO words (word, wordset_id)
                         VALUES (%s, %s);
                         """,
-                        [(word, wordset_id) for word in wordset_update.words[existing_count:]],
+                        [(word, wordset_id) for word in wordset_write.words[existing_count:]],
                     )
                 elif incoming_count < existing_count:
                     delete_word_ids = tuple(
@@ -238,7 +237,7 @@ class WordsetRepository:
 
         return WordsetRead(
             id=wordset_id,
-            category=wordset_update.category,
-            difficulty=wordset_update.difficulty,
-            words=wordset_update.words,
+            category=wordset_write.category,
+            difficulty=wordset_write.difficulty,
+            words=wordset_write.words,
         )

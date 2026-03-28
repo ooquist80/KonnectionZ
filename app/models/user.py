@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UserNotFoundError(Exception):
@@ -8,9 +8,10 @@ class UserNotFoundError(Exception):
 class UserRead(BaseModel):
     id: int
     email: str
+    password: str
     username: str
 
 class UserWrite(BaseModel):
-    email: str
+    email: EmailStr
     username: str
     password: str

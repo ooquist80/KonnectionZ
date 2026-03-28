@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from app.db.client import DatabaseClient
-from app.models.game import GameRead, GameNotFoundError, Resultmessage, GameWrite
+from app.models.game import GameRead, GameNotFoundError, ResultMessage, GameWrite, GameAlreadyCompletedError
 from app.models.gameset import GameSetNotFoundError
 from app.models.user import UserNotFoundError
 from app.repositories.game import GameRepository
@@ -39,9 +39,9 @@ class GameService:
         return GameRead(id=game_record.id, user_id=game_record.user_id, gameset_id=game_record.gameset_id, start_time=game_record.start_time,
                         end_time=game_record.end_time, completed_wordsets=wordsets)
 
-
-
-    def play_words(self, game, payload) -> Resultmessage:
+    def play_words(self, game, played_words) -> ResultMessage:
+        if game.end_time is not None:
+            raise GameAlreadyCompletedError(f"Game with id: {game.id} is already completed.")
         gameset_record = self.gameset_repository.get_by_id(game.gameset_id)
         wordsets = []
         for wordset_id in gameset_record.wordsets:
@@ -52,17 +52,17 @@ class GameService:
             correct_word_count = 0
             if wordset not in game.completed_wordsets:
                 for word in wordset.words:
-                    if word in payload:
+                    if word in played_words:
                         correct_word_count = correct_word_count + 1
-                if correct_word_count == 4:
+                if correct_word_count == len(wordset.words):
                     self.game_repository.add_completed_wordset(game_id=game.id, wordset_id=wordset.id)
-                    if len(game.completed_wordsets) == 3:
+                    if len(game.completed_wordsets) == len(wordsets) - 1:
                         self.game_repository.add_game_end_time(game_id=game.id, end_time=datetime.now())
-                    return Resultmessage.CORRECT
-                if correct_word_count == 3:
-                    return Resultmessage.CORRECT
+                        return ResultMessage.COMPLETED
+                if correct_word_count == len(wordset.words) - 1:
+                    return ResultMessage.ALMOST_CORRECT
 
-        return Resultmessage.INCORRECT
+        return ResultMessage.INCORRECT
 
     def get_games(self):
         game_records = self.game_repository.get_all()
