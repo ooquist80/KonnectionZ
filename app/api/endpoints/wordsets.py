@@ -28,15 +28,17 @@ def create_wordset(
 
 
 @router.get("", response_model=list[WordsetRead])
-def list_wordsets(wordset_service: WordsetService = Depends(get_wordset_service)) -> list[WordsetRead]:
+def list_wordsets(current_user: Annotated[UserRead, Depends(get_current_user)],
+                  wordset_service: WordsetService = Depends(get_wordset_service)) -> list[WordsetRead]:
     return wordset_service.get_all_wordsets()
 
 
 @router.get("/{wordset_id}", response_model=WordsetRead)
 def get_wordset(
         wordset_id: int,
+        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service),
-) -> WordsetRead:
+        ) -> WordsetRead:
     try:
         return wordset_service.get_wordset(wordset_id)
     except WordsetNotFoundError as exc:
@@ -47,8 +49,9 @@ def get_wordset(
 def update_wordset(
         wordset_id: int,
         payload: WordsetWrite,
+        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service),
-) -> WordsetRead:
+        ) -> WordsetRead:
     try:
         return wordset_service.update_wordset(wordset_id, payload)
     except InvalidDifficultyError as exc:
@@ -60,8 +63,9 @@ def update_wordset(
 @router.delete("/{wordset_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_wordset(
         wordset_id: int,
+        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service),
-) -> Response:
+        ) -> Response:
     try:
         wordset_service.delete_wordset(wordset_id)
     except WordsetNotFoundError as exc:
