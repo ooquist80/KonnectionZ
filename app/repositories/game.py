@@ -10,20 +10,21 @@ class GameRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
 
-    def create(self, game_write : GameWrite) -> GameRead:
+    def create(self, user_id: int, game_write : GameWrite) -> GameRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
+                start_time = datetime.now()
                 cursor.execute(
                     """
                     INSERT INTO games (user_id, gameset_id, start_time)
                     VALUES (%s, %s, %s)
                     """,
-                    (game_write.user_id, game_write.gameset_id, game_write.start_time)
+                    (user_id, game_write.gameset_id, start_time)
                 )
                 game_id = cursor.lastrowid
             connection.commit()
-        return GameRead(id=game_id, user_id=game_write.user_id, gameset_id=game_write.gameset_id,
-                        start_time=game_write.start_time)
+        return GameRead(id=game_id, user_id=user_id, gameset_id=game_write.gameset_id,
+                        start_time=start_time)
 
     def get_by_id(self, game_id) -> GameRecord | None:
         with self.database_client.connect() as connection:

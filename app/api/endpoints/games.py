@@ -1,5 +1,5 @@
 from typing import Annotated
-
+from pydantic import Field
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -19,9 +19,12 @@ def get_game_service(database_client: DatabaseClient = Depends(get_database_clie
 
 
 @router.post("/", response_model=GameRead, status_code=status.HTTP_201_CREATED)
-def create_game(payload: GameWrite, game_service: GameService = Depends(get_game_service)) -> GameRead:
+def create_game(payload: GameWrite,
+                current_user: Annotated[UserRead, Depends(get_current_user)],
+                game_service: GameService = Depends(get_game_service)) -> GameRead:
+
     try:
-        return game_service.create_game(payload)
+        return game_service.create_game(current_user, payload)
     except UserNotFoundError as exception:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=str(exception)) from exception
     except GameSetNotFoundError as exception:
@@ -49,12 +52,14 @@ def get_games(current_user: Annotated[UserRead, Depends(get_current_user)],
 def play_words(game_id: int,
                payload: list[str],
                current_user: Annotated[UserRead, Depends(get_current_user)],
-               game_service: GameService = Depends(get_game_service)):
+               game_service: GameService = Depends(get_game_service)
+               ) -> PlayResult:
     try:
         game = game_service.get_game(game_id)
     except GameNotFoundError as exception:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
-
+    if current_user.id != game.user_id:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=f"Game with id: {game_id} does not belong to user with id: {current_user.id}.") from None
     try:
         result_message = game_service.play_words(game, payload)
     except GameAlreadyCompletedError as exception:

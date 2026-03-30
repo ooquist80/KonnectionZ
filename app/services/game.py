@@ -3,7 +3,7 @@ from datetime import datetime
 from app.db.client import DatabaseClient
 from app.models.game import GameRead, GameNotFoundError, ResultMessage, GameWrite, GameAlreadyCompletedError
 from app.models.gameset import GameSetNotFoundError
-from app.models.user import UserNotFoundError
+from app.models.user import UserNotFoundError, UserRead
 from app.repositories.game import GameRepository
 from app.repositories.gameset import GameSetRepository
 from app.repositories.user import UserRepository
@@ -18,15 +18,11 @@ class GameService:
         self.gameset_repository = GameSetRepository(database_client)
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create_game(self, game_write : GameWrite) -> GameRead:
-        user = self.user_repository.get_by_id(user_id=game_write.user_id)
-        if user is None:
-            raise UserNotFoundError(f"User with id: {game_write.user_id} was not found.")
+    def create_game(self, user: UserRead, game_write : GameWrite) -> GameRead:
         gameset = self.gameset_repository.get_by_id(game_write.gameset_id)
         if gameset is None:
             raise GameSetNotFoundError(f"Gameset with id: {game_write.gameset_id} was not found.")
-
-        created_game = self.game_repository.create(game_write)
+        created_game = self.game_repository.create(user.id, game_write)
         return created_game
 
     def get_game(self, game_id: int) -> GameRead:
@@ -59,6 +55,8 @@ class GameService:
                     if len(game.completed_wordsets) == len(wordsets) - 1:
                         self.game_repository.add_game_end_time(game_id=game.id, end_time=datetime.now())
                         return ResultMessage.COMPLETED
+                    else:
+                        return ResultMessage.CORRECT
                 if correct_word_count == len(wordset.words) - 1:
                     return ResultMessage.ALMOST_CORRECT
 

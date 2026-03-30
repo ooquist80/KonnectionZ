@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.api.deps import get_database_client
+from app.api.deps import get_database_client, get_current_user
 from app.db.client import DatabaseClient
+from app.models.user import UserRead
 from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetRegisteredInGameError, WordsetWrite
 from app.services.wordset import InvalidDifficultyError, WordsetService
 
@@ -17,7 +18,9 @@ def get_wordset_service(database_client: DatabaseClient = Depends(get_database_c
 
 @router.post("", response_model=WordsetRead, status_code=status.HTTP_201_CREATED)
 def create_wordset(
-        payload: WordsetWrite, wordset_service: WordsetService = Depends(get_wordset_service)) -> WordsetRead:
+        payload: WordsetWrite,
+        current_user: Annotated[UserRead, Depends(get_current_user)],
+        wordset_service: WordsetService = Depends(get_wordset_service)) -> WordsetRead:
     try:
         return wordset_service.create_wordset(payload)
     except InvalidDifficultyError as exc:

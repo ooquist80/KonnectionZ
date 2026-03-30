@@ -25,7 +25,6 @@ def get_me(current_user: Annotated[UserRead, Depends(get_current_user)]) -> User
 def create_user(payload: UserWrite, user_service: UserService = Depends(get_user_service)) -> UserRead:
     return user_service.create_user(payload)
 
-
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
 def get_user(user_id: int,
              current_user: Annotated[UserRead, Depends(get_current_user)],

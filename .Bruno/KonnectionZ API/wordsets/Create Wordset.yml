@@ -12,9 +12,9 @@ http:
     type: json
     data: |-
       {
-        "category": "",
-        "difficulty": 0,
-        "words": []
+        "category": "Devops tools",
+        "difficulty": 1,
+        "words": ["Jenkins", "Kubernetes", "ArgoCD", "Github"
       }
   auth: inherit
 

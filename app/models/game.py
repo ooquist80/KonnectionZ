@@ -20,10 +20,7 @@ class GameRead(BaseModel):
     completed_wordsets: list[WordsetRead] | None = None
 
 class GameWrite(BaseModel):
-    user_id: int
     gameset_id: int
-    start_time: datetime.datetime | None = None
-    end_time: datetime.datetime | None = None
 
 class GameRecord(BaseModel):
     id: int
