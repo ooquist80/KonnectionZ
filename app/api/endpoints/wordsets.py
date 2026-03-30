@@ -1,4 +1,7 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi.security import OAuth2PasswordBearer
 
 from app.api.deps import get_database_client
 from app.db.client import DatabaseClient

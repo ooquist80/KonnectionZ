@@ -8,10 +8,15 @@ class UserNotFoundError(Exception):
 class UserRead(BaseModel):
     id: int
     email: str
-    password: str
     username: str
 
 class UserWrite(BaseModel):
     email: EmailStr
+    username: str
+    password: str
+
+class UserRecord(BaseModel):
+    id: int
+    email: str
     username: str
     password: str

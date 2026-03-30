@@ -1,6 +1,6 @@
 from pymysql.cursors import DictCursor
 
-from app.models.user import UserRead, UserWrite
+from app.models.user import UserRead, UserWrite, UserRecord
 from app.db.client import DatabaseClient
 
 
@@ -38,3 +38,21 @@ class UserRepository:
         if user_row is None:
             return None
         return UserRead(id=user_row["id"], email=user_row["email"], username=user_row["username"])
+
+    def get_by_username(self, username) -> UserRecord:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT id, email, username, password
+                    FROM users
+                    WHERE username = %s
+                    """,
+                    (username,)
+                )
+                user_row = cursor.fetchone()
+
+        if user_row is None:
+            return None
+        return UserRecord(id=user_row["id"], email=user_row["email"], username=user_row["username"],
+                          password=user_row["password"])
