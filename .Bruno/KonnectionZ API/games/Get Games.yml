@@ -8,7 +8,9 @@ info:
 http:
   method: GET
   url: "{{baseUrl}}/games/"
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{token}}"
 
 settings:
   encodeUrl: true

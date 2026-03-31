@@ -10,14 +10,17 @@ http:
   url: "{{baseUrl}}/games/play/:game_id"
   params:
     - name: game_id
-      value: ""
+      value: "1"
       type: path
   body:
     type: json
     data: |-
       [
-        {}
-      ]
+            "Jenkins",
+            "Kubernetes",
+            "ArgoCD",
+            "Github"
+          ]
   auth: inherit
 
 settings:

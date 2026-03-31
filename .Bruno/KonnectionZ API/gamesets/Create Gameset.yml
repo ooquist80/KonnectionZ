@@ -12,9 +12,9 @@ http:
     type: json
     data: |-
       {
-        "date": "",
-        "name": "",
-        "wordsets": []
+        "date": "2026-03-30",
+        "name": "TestGame",
+        "wordsets": [1,2,3,4]
       }
   auth: inherit
 

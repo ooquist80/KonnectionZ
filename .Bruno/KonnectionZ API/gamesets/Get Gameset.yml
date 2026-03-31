@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/gamesets/:gameset_id"
   params:
     - name: gameset_id
-      value: ""
+      value: "1"
       type: path
   auth: inherit
 

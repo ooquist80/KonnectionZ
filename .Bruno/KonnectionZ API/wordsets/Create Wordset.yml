@@ -14,7 +14,7 @@ http:
       {
         "category": "Devops tools",
         "difficulty": 1,
-        "words": ["Jenkins", "Kubernetes", "ArgoCD", "Github"
+        "words": ["Jenkins", "Kubernetes", "ArgoCD", "Github"]
       }
   auth: inherit
 

@@ -12,10 +12,7 @@ http:
     type: json
     data: |-
       {
-        "user_id": 0,
-        "gameset_id": 0,
-        "start_time": "",
-        "end_time": ""
+        "gameset_id": 1
       }
   auth: inherit
 

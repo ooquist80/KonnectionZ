@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Security
 from fastapi.security import OAuth2PasswordBearer
 
 from app.api.deps import get_database_client, get_current_user
@@ -9,7 +9,7 @@ from app.models.user import UserRead
 from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetRegisteredInGameError, WordsetWrite
 from app.services.wordset import InvalidDifficultyError, WordsetService
 
-router = APIRouter(prefix="/wordsets", tags=["wordsets"])
+router = APIRouter(prefix="/wordsets", tags=["wordsets"], dependencies=[Security(get_current_user, scopes = ["user:admin"])])
 
 
 def get_wordset_service(database_client: DatabaseClient = Depends(get_database_client)) -> WordsetService:
@@ -28,7 +28,7 @@ def create_wordset(
 
 
 @router.get("", response_model=list[WordsetRead])
-def list_wordsets(current_user: Annotated[UserRead, Depends(get_current_user)],
+def list_wordsets(current_user: Annotated[UserRead, Security(get_current_user, scopes = ["user:admin"])],
                   wordset_service: WordsetService = Depends(get_wordset_service)) -> list[WordsetRead]:
     return wordset_service.get_all_wordsets()
 

@@ -10,9 +10,11 @@ http:
   url: "{{baseUrl}}/games/:game_id"
   params:
     - name: game_id
-      value: ""
+      value: "1"
       type: path
-  auth: inherit
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvbGxlIiwiZXhwIjoxNzc0ODk3ODYxfQ.v4Qws_WyfZTCr6zV4pRC9KXPjIQhy0cyj7KLIdkkixc
 
 settings:
   encodeUrl: true

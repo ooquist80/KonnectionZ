@@ -13,17 +13,28 @@ http:
     data:
       - name: grant_type
         value: ""
+        disabled: true
       - name: username
-        value: ""
+        value: olle
       - name: password
-        value: ""
+        value: pass
       - name: scope
         value: ""
+        disabled: true
       - name: client_id
         value: ""
+        disabled: true
       - name: client_secret
         value: ""
+        disabled: true
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        let token = res.getBody().access_token
+        bru.setEnvVar("token", token);
 
 settings:
   encodeUrl: true
