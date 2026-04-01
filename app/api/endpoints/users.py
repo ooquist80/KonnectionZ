@@ -11,8 +11,6 @@ from app.services.user import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/token")
-
 
 def get_user_service(database_client: DatabaseClient = Depends(get_database_client)) -> UserService:
     return UserService(database_client)
@@ -36,10 +34,3 @@ def get_user(user_id: int,
         return user_service.get_user_by_id(user_id)
     except UserNotFoundError as exception:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
-
-
-@router.post("/token")
-def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-          user_service: UserService = Depends(get_user_service)):
-    token = user_service.login(form_data.username, form_data.password, form_data.scopes)
-    return token
