@@ -12,7 +12,7 @@ class WordsetNotFoundError(Exception):
 
 
 class WordsetRead(BaseModel):
-    id: int | None = None
+    id: int
     category: str
     difficulty: int
     words: list[WordRead] = Field(min_length=4)

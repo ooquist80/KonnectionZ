@@ -28,8 +28,8 @@ class WordsetRepository:
                     [(word, wordset_id) for word in wordset_write.words],
                 )
             connection.commit()
-        return WordsetRead(id=wordset_id, category=wordset_write.category, difficulty=wordset_write.difficulty,
-                           words=wordset_write.words)
+
+        return self.get_by_id(wordset_id)
 
     def get_by_id(self, wordset_id: int) -> WordsetRead | None:
         with self.database_client.connect() as connection:
