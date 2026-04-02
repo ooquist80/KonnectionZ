@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 
 from app.api.deps import get_database_client, get_current_user
@@ -10,7 +10,7 @@ from app.models.gameset import GameSetNotFoundError
 from app.models.user import UserRead
 from app.services.game_service import GameService
 
-router = APIRouter(prefix="/games", tags=["games"])
+router = APIRouter(prefix="/games", tags=["games"], dependencies=[Security(get_current_user, scopes = ["user:admin"])])
 
 
 def get_game_service(database_client: DatabaseClient = Depends(get_database_client)) -> GameService:

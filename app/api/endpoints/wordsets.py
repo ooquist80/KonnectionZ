@@ -18,7 +18,6 @@ def get_wordset_service(database_client: DatabaseClient = Depends(get_database_c
 @router.post("", response_model=WordsetRead, status_code=status.HTTP_201_CREATED)
 def create_wordset(
         payload: WordsetWrite,
-        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service)) -> WordsetRead:
     try:
         return wordset_service.create_wordset(payload)
@@ -27,15 +26,13 @@ def create_wordset(
 
 
 @router.get("", response_model=list[WordsetRead])
-def list_wordsets(current_user: Annotated[UserRead, Security(get_current_user, scopes = ["user:admin"])],
-                  wordset_service: WordsetService = Depends(get_wordset_service)) -> list[WordsetRead]:
+def list_wordsets(wordset_service: WordsetService = Depends(get_wordset_service)) -> list[WordsetRead]:
     return wordset_service.get_all_wordsets()
 
 
 @router.get("/{wordset_id}", response_model=WordsetRead)
 def get_wordset(
         wordset_id: int,
-        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service),
         ) -> WordsetRead:
     try:
@@ -48,7 +45,6 @@ def get_wordset(
 def update_wordset(
         wordset_id: int,
         payload: WordsetWrite,
-        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service),
         ) -> WordsetRead:
     try:
@@ -62,7 +58,6 @@ def update_wordset(
 @router.delete("/{wordset_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_wordset(
         wordset_id: int,
-        current_user: Annotated[UserRead, Depends(get_current_user)],
         wordset_service: WordsetService = Depends(get_wordset_service),
         ) -> Response:
     try:

@@ -2,7 +2,7 @@ import datetime
 
 from pymysql.cursors import DictCursor
 
-from app.models.gameset import GameSetRead, GameSetNotFoundError, GameSetInDb
+from app.models.gameset import GameSetRead, GameSetNotFoundError
 from app.db.client import DatabaseClient
 from app.repositories.wordset_repository import WordsetRepository
 

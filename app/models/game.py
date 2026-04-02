@@ -1,8 +1,7 @@
 import datetime
-from enum import Enum
 
 from pydantic import BaseModel
-from app.models.wordset import WordsetRead
+
 from app.models.gameset import GameSetRead
 
 

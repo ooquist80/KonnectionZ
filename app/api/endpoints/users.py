@@ -9,7 +9,7 @@ from app.db.client import DatabaseClient
 from app.models.user import UserRead, UserWrite, UserNotFoundError
 from app.services.user_service import UserService
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/users", tags=["users"], dependencies=[Security(get_current_user, scopes = ["user:admin"])])
 
 
 def get_user_service(database_client: DatabaseClient = Depends(get_database_client)) -> UserService:
@@ -27,9 +27,7 @@ def create_user(payload: UserWrite, user_service: UserService = Depends(get_user
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
-def get_user(user_id: int,
-             current_user: Annotated[UserRead, Depends(get_current_user)],
-             user_service: UserService = Depends(get_user_service)) -> UserRead:
+def get_user(user_id: int, user_service: UserService = Depends(get_user_service)) -> UserRead:
     try:
         return user_service.get_user_by_id(user_id)
     except UserNotFoundError as exception:

@@ -2,8 +2,7 @@ from pymysql.cursors import DictCursor
 
 from app.db.client import DatabaseClient
 from app.models.word import WordRead
-from app.models.wordset import WordsetRead, WordsetRegisteredInGameError, WordsetNotFoundError, WordsetWrite, \
-    WordsetInDB
+from app.models.wordset import WordsetRead, WordsetRegisteredInGameError, WordsetNotFoundError, WordsetWrite
 
 
 class WordsetRepository:
@@ -37,13 +36,11 @@ class WordsetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT w.id,
-                           w.category,
-                           w.difficulty
-                    FROM wordsets w
-                    WHERE w.id = %s
+                    SELECT id, category, difficulty
+                    FROM wordsets
+                    WHERE id = %s
                     """,
-                    (wordset_id,)
+                    wordset_id
                 )
                 wordset_row = cursor.fetchone()
                 if not wordset_row:
@@ -54,16 +51,14 @@ class WordsetRepository:
                     FROM words
                     WHERE wordset_id = %s;
                     """,
-                    (wordset_id,)
+                    wordset_id
                 )
                 word_rows = cursor.fetchall()
-                wordset = WordsetInDB(id=wordset_row["id"], category=wordset_row["category"],
-                                      difficulty=wordset_row["difficulty"])
                 words = []
                 for word_row in word_rows:
                     words.append(WordRead(id=word_row["id"], word=word_row["word"]))
-                return WordsetRead(id=wordset.id, category=wordset.category,
-                                   difficulty=wordset.difficulty, words=words)
+                return WordsetRead(id=wordset_row["id"], category=wordset_row["category"],
+                                   difficulty=wordset_row["difficulty"], words=words)
 
     def get_all(self) -> list[WordsetRead]:
         with self.database_client.connect() as connection:
@@ -104,7 +99,7 @@ class WordsetRepository:
                     FROM games_wordsets
                     WHERE wordset_id = %s;
                     """,
-                    (wordset_id,)
+                    wordset_id
                 )
                 game_ids = cursor.fetchall()
                 if game_ids:
@@ -115,7 +110,7 @@ class WordsetRepository:
                     FROM words
                     WHERE wordset_id = %s;
                     """,
-                    (wordset_id,),
+                    wordset_id
                 )
                 cursor.execute(
                     """
@@ -123,7 +118,7 @@ class WordsetRepository:
                     FROM wordsets
                     WHERE id = %s;
                     """,
-                    (wordset_id,),
+                    wordset_id
                 )
                 deleted = cursor.rowcount > 0
 
@@ -144,10 +139,9 @@ class WordsetRepository:
                     FROM difficulties
                     WHERE id = %s;
                     """,
-                    (difficulty_id,),
+                    difficulty_id
                 )
                 row = cursor.fetchone()
-
         return row is not None
 
     def update(self, wordset_id: int, wordset_write: WordsetWrite) -> WordsetRead:
@@ -160,7 +154,7 @@ class WordsetRepository:
                     FROM wordsets
                     WHERE id = %s;
                     """,
-                    (wordset_id,),
+                    wordset_id
                 )
                 if cursor.fetchone() is None:
                     connection.rollback()
@@ -182,7 +176,7 @@ class WordsetRepository:
                     WHERE wordset_id = %s
                     ORDER BY id;
                     """,
-                    (wordset_id,),
+                    wordset_id
                 )
                 word_rows = cursor.fetchall()
 
@@ -230,5 +224,5 @@ class WordsetRepository:
             id=wordset_id,
             category=wordset_write.category,
             difficulty=wordset_write.difficulty,
-            words=wordset_write.words,
+            words=wordset_write.words
         )

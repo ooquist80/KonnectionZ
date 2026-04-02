@@ -59,14 +59,14 @@ class UserService:
             token_data = TokenData(scopes=token_scopes, username=username)
         except InvalidTokenError:
             raise credentials_exception
-        user = self.user_repository.get_by_username(username)
-        if user is None:
+        user_record = self.user_repository.get_by_username(username)
+        if user_record is None:
             raise credentials_exception
         for scope in required_scopes.scopes:
-            if scope not in token_data.scopes or scope not in user.scopes:
+            if scope not in token_data.scopes or scope not in user_record.scopes:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Not enough permissions",
                     headers={"WWW-Authenticate": f'Bearer scope="{scope}"'},
                 )
-        return user
+        return user_record
