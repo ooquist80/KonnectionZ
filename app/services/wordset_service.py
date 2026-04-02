@@ -1,6 +1,6 @@
 from app.db.client import DatabaseClient
 from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetWrite
-from app.repositories.wordset import WordsetRepository
+from app.repositories.wordset_repository import WordsetRepository
 
 
 class InvalidDifficultyError(Exception):

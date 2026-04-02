@@ -6,7 +6,7 @@ from app.api.deps import get_database_client, get_current_user
 from app.db.client import DatabaseClient
 from app.models.user import UserRead
 from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetRegisteredInGameError, WordsetWrite
-from app.services.wordset import InvalidDifficultyError, WordsetService
+from app.services.wordset_service import InvalidDifficultyError, WordsetService
 
 router = APIRouter(prefix="/wordsets", tags=["wordsets"], dependencies=[Security(get_current_user, scopes = ["user:admin"])])
 

@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from starlette.status import HTTP_404_NOT_FOUND
 
 from app.api.deps import get_database_client, get_current_user
 from app.db.client import DatabaseClient
 from app.models.user import UserRead, UserWrite, UserNotFoundError
-from app.services.user import UserService
+from app.services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["users"])
 

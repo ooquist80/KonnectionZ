@@ -12,9 +12,7 @@ http:
     - name: user_id
       value: "1"
       type: path
-  auth:
-    type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJvbGxlIiwiZXhwIjoxNzc0ODk3ODYxfQ.v4Qws_WyfZTCr6zV4pRC9KXPjIQhy0cyj7KLIdkkixc
+  auth: inherit
 
 settings:
   encodeUrl: true

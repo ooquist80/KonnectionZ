@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.deps import get_database_client
 from app.db.client import DatabaseClient
-from app.services.auth import AuthService
+from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

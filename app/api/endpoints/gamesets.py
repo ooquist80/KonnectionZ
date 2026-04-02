@@ -4,7 +4,7 @@ from starlette.status import HTTP_404_NOT_FOUND
 from app.api.deps import get_database_client, get_current_user
 from app.db.client import DatabaseClient
 from app.models.gameset import GameSetRead, GameSetWrite
-from app.services.gameset import GameSetService, GameSetNotFoundError
+from app.services.gameset_service import GameSetService, GameSetNotFoundError
 
 router = APIRouter(prefix="/gamesets", tags=["gamesets"],
                    dependencies=[Security(get_current_user, scopes=["user:admin"])])

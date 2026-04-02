@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.models.token import Token
 from app.models.user import UserNotFoundError
 from ..db.client import DatabaseClient
-from ..repositories.user import UserRepository
+from ..repositories.user_repository import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 settings = get_settings()

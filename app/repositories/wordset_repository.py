@@ -1,14 +1,16 @@
 from pymysql.cursors import DictCursor
 
-from app.models.wordset import WordsetRead, WordsetRegisteredInGameError, WordsetNotFoundError, WordsetWrite
 from app.db.client import DatabaseClient
+from app.models.word import WordRead
+from app.models.wordset import WordsetRead, WordsetRegisteredInGameError, WordsetNotFoundError, WordsetWrite, \
+    WordsetInDB
 
 
 class WordsetRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
 
-    def create(self, wordset_write : WordsetWrite) -> WordsetRead:
+    def create(self, wordset_write: WordsetWrite) -> WordsetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -44,23 +46,24 @@ class WordsetRepository:
                     (wordset_id,)
                 )
                 wordset_row = cursor.fetchone()
-
                 if not wordset_row:
                     return None
-
                 cursor.execute(
                     """
-                    SELECT w.word
-                    FROM words w
-                    WHERE w.wordset_id = %s;
+                    SELECT id, word
+                    FROM words
+                    WHERE wordset_id = %s;
                     """,
                     (wordset_id,)
                 )
                 word_rows = cursor.fetchall()
-                words = [word_row["word"] for word_row in word_rows]
-
-                return WordsetRead(id=wordset_row["id"], category=wordset_row["category"],
-                                   difficulty=wordset_row["difficulty"], words=words)
+                wordset = WordsetInDB(id=wordset_row["id"], category=wordset_row["category"],
+                                      difficulty=wordset_row["difficulty"])
+                words = []
+                for word_row in word_rows:
+                    words.append(WordRead(id=word_row["id"], word=word_row["word"]))
+                return WordsetRead(id=wordset.id, category=wordset.category,
+                                   difficulty=wordset.difficulty, words=words)
 
     def get_all(self) -> list[WordsetRead]:
         with self.database_client.connect() as connection:
@@ -74,35 +77,23 @@ class WordsetRepository:
                     """
                 )
                 wordset_rows = cursor.fetchall()
+
                 if not wordset_rows:
                     return []
-                wordset_ids = [row["id"] for row in wordset_rows]
-                cursor.execute(
-                    """
-                    SELECT w.wordset_id, w.word
-                    FROM words w
-                    WHERE w.wordset_id IN %s;
-                    """,
-                    (wordset_ids,)
-                )
-                word_rows = cursor.fetchall()
-                word_dict = {}
-                for word_row in word_rows:
-                    if word_row["wordset_id"] not in word_dict:
-                        word_dict[word_row["wordset_id"]] = []
-                    word_dict[word_row["wordset_id"]].append(word_row["word"])
-
-                result = []
+                wordsets = []
                 for wordset_row in wordset_rows:
-                    result.append(WordsetRead(
-                        id=wordset_row["id"],
-                        category=wordset_row["category"],
-                        difficulty=wordset_row["difficulty"],
-                        words=word_dict.get(wordset_row["id"], [])
-                        )
-                    )
-
-        return result
+                    cursor.execute(
+                        """
+                        SELECT id, wordset_id, word
+                        FROM words
+                        WHERE wordset_id = %s;
+                        """, wordset_row["id"])
+                    words = []
+                    for word_row in cursor.fetchall():
+                        words.append(WordRead(id=word_row["id"], word=word_row["word"]))
+                    wordsets.append(WordsetRead(id=wordset_row["id"], category=wordset_row["category"],
+                                                difficulty=wordset_row["difficulty"], words=words))
+        return wordsets
 
     def delete(self, wordset_id: int) -> bool:
         with self.database_client.connect() as connection:

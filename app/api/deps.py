@@ -7,7 +7,7 @@ from pwdlib import PasswordHash
 from app.core.config import Settings, get_settings
 from app.db.client import DatabaseClient
 from app.models.user import UserRead
-from app.services.user import UserService
+from app.services.user_service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="auth/token",

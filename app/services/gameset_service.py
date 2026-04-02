@@ -1,4 +1,8 @@
-from app.repositories.gameset import GameSetRepository
+from typing import List
+
+from app.models.wordset import WordsetRead
+from app.repositories.gameset_repository import GameSetRepository
+from app.repositories.wordset_repository import WordsetRepository
 from app.models.gameset import GameSetRead, GameSetWrite, GameSetNotFoundError
 from app.db.client import DatabaseClient
 
@@ -7,6 +11,7 @@ class GameSetService:
 
     def __init__(self, database_client: DatabaseClient) -> None:
         self.gameset_repository = GameSetRepository(database_client)
+        self.wordset_repository = WordsetRepository(database_client)
 
     def create_gameset(self, payload: GameSetWrite) -> GameSetRead:
         created_gameset = self.gameset_repository.create(name=payload.name, date=payload.date,
@@ -17,6 +22,7 @@ class GameSetService:
         gameset = self.gameset_repository.get_by_id(gameset_id)
         if gameset is None:
             raise GameSetNotFoundError(f"Gameset with id: {gameset_id} was not found.")
+
         return gameset
 
     def delete_gameset(self, gameset_id: int) -> None:

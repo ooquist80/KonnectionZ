@@ -2,13 +2,15 @@ import datetime
 
 from pymysql.cursors import DictCursor
 
-from app.models.gameset import GameSetRead, GameSetNotFoundError
+from app.models.gameset import GameSetRead, GameSetNotFoundError, GameSetInDb
 from app.db.client import DatabaseClient
+from app.repositories.wordset_repository import WordsetRepository
 
 
 class GameSetRepository:
     def __init__(self, database_client: DatabaseClient) -> None:
         self.database_client = database_client
+        self.wordset_repository = WordsetRepository(database_client)
 
     def create(self, date: datetime.datetime, name, wordsets: list[int]) -> GameSetRead:
         with self.database_client.connect() as connection:
@@ -56,10 +58,10 @@ class GameSetRepository:
                     (game_id,),
                 )
                 wordset_rows = cursor.fetchall()
-                wordset_ids = []
+                wordsets = []
                 for wordset_row in wordset_rows:
-                    wordset_ids.append(wordset_row["wordset_id"])
-        return GameSetRead(id=game_row["id"], date=game_row["date"], name=game_row["name"], wordsets=wordset_ids)
+                    wordsets.append(self.wordset_repository.get_by_id(wordset_row["wordset_id"]))
+        return GameSetRead(id=game_row["id"], date=game_row["date"], name=game_row["name"], wordsets=wordsets)
 
     def delete(self, game_id: int) -> bool:
         with self.database_client.connect() as connection:

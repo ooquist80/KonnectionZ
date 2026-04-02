@@ -10,7 +10,7 @@ from app.db.client import DatabaseClient
 from app.core.config import get_settings
 from app.models.token import TokenData
 from app.models.user import UserRead, UserNotFoundError, UserWrite, UserRecord
-from app.repositories.user import UserRepository
+from app.repositories.user_repository import UserRepository
 
 
 class UserService:
@@ -43,27 +43,26 @@ class UserService:
             raise UserNotFoundError(f"User with id: {user_id} was not found.")
         return user
 
-    def get_current_user(self, security_scopes: SecurityScopes, token: str) -> UserRecord:
+    def get_current_user(self, required_scopes: SecurityScopes, token: str) -> UserRecord:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload = jwt.decode(token, self.settings.access_token_auth_key,
+            decoded_token = jwt.decode(token, self.settings.access_token_auth_key,
                                  algorithms=[self.settings.access_token_algorithm])
-            username: str = payload.get("sub")
+            username: str = decoded_token.get("sub")
             if username is None:
                 raise credentials_exception
-            scopes_string: str = payload.get("scopes", "")
-            token_scopes = scopes_string.split(" ")
+            token_scopes: list[str] = decoded_token.get("scopes", "").split(" ")
             token_data = TokenData(scopes=token_scopes, username=username)
         except InvalidTokenError:
             raise credentials_exception
         user = self.user_repository.get_by_username(username)
         if user is None:
             raise credentials_exception
-        for scope in security_scopes.scopes:
+        for scope in required_scopes.scopes:
             if scope not in token_data.scopes or scope not in user.scopes:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
