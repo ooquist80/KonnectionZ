@@ -15,20 +15,24 @@ class GameRepository:
         self.database_client = database_client
         self.gameset_repository = GameSetRepository(database_client)
 
-    def create(self, user_id: int, game_write : GameWrite, gameset) -> GameRead:
+    def create(self, user_id: int, gameset_id) -> GameRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
+                gameset = self.gameset_repository.get_by_id(gameset_id)
+                if gameset is None:
+                    raise GameSetNotFoundError()
                 start_time = datetime.now()
                 cursor.execute(
                     """
                     INSERT INTO games (user_id, gameset_id, start_time)
                     VALUES (%s, %s, %s)
                     """,
-                    (user_id, game_write.gameset_id, start_time)
+                    (user_id, gameset_id, start_time)
                 )
                 game_id = cursor.lastrowid
             connection.commit()
-        return GameRead(id=game_id, user_id=user_id, gameset_id=game_write.gameset_id,
+
+        return GameRead(id=game_id, user_id=user_id, gameset=gameset,
                         start_time=start_time)
 
     def get_by_id(self, game_id) -> GameRead | None:

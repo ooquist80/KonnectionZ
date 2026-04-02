@@ -5,10 +5,13 @@ from pydantic import BaseModel
 
 from app.models.wordset import WordsetRead
 
+class GameAlreadyCompletedError(Exception):
+    pass
+
 class GameStatus(BaseModel):
-    start_date: datetime
-    end_date: datetime | None = None
-    words_left: list[str]
+    start_time: datetime
+    end_time: datetime | None = None
+    words_remaining: list[str]
     wordsets_completed: list[WordsetRead]
     turn_count: int = 0
 
@@ -19,7 +22,8 @@ class ResultMessage(str, Enum):
     INCORRECT = "Incorrect! Try again."
 
 class PlayResult(BaseModel):
+    game_id: int
     game_status: GameStatus
-    result_message: ResultMessage
+    result_message: ResultMessage | None = None
 
 

@@ -1,0 +1,22 @@
+info:
+  name: Create Game
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/play/:gameset_id"
+  params:
+    - name: gameset_id
+      value: ""
+      type: path
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

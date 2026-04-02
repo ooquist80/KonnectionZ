@@ -1,0 +1,15 @@
+info:
+  name: Play Words
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/play"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
