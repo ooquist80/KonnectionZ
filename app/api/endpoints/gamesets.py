@@ -14,14 +14,14 @@ def get_gameset_service(database_client: DatabaseClient = Depends(get_database_c
     return GameSetService(database_client)
 
 
-@router.post("/", response_model=GameSetRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_gameset(payload: GameSetWrite,
                    gameset_service: GameSetService = Depends(get_gameset_service),
                    ) -> GameSetRead:
     return gameset_service.create_gameset(payload)
 
 
-@router.get("/{gameset_id}", response_model=GameSetRead, status_code=status.HTTP_200_OK)
+@router.get("/{gameset_id}", status_code=status.HTTP_200_OK)
 def get_gameset(gameset_id: int,
                 gameset_service: GameSetService = Depends(get_gameset_service)
                 ) -> GameSetRead:

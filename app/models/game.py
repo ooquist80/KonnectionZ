@@ -15,6 +15,7 @@ class GameRead(BaseModel):
     id: int
     user_id: int
     gameset: GameSetRead
+    turn_count: int = 0
     start_time: datetime.datetime
     end_time: datetime.datetime | None = None
     completed_wordsets: list[int] = []

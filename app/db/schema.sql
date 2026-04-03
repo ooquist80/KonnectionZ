@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS games (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT NOT NULL,
     `gameset_id` INT NOT NULL,
-    `turns_count` INT DEFAULT 0,
+    `turn_count` INT DEFAULT 0,
     `start_time` DATETIME NOT NULL,
     `end_time` DATETIME,
     KEY `games_gamesets_FK` (`gameset_id`),

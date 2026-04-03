@@ -13,16 +13,19 @@ http:
     data:
       - name: grant_type
         value: ""
+        disabled: true
       - name: username
-        value: ""
+        value: olle
       - name: password
-        value: ""
+        value: pass
       - name: scope
-        value: ""
+        value: user:play
       - name: client_id
         value: ""
+        disabled: true
       - name: client_secret
         value: ""
+        disabled: true
   auth: inherit
 
 settings:

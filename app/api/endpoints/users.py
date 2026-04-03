@@ -16,17 +16,17 @@ def get_user_service(database_client: DatabaseClient = Depends(get_database_clie
     return UserService(database_client)
 
 
-@router.get("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
+@router.get("/me", status_code=status.HTTP_200_OK)
 def get_me(current_user: Annotated[UserRead, Depends(get_current_user)]) -> UserRead:
     return current_user
 
 
-@router.post("", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def create_user(payload: UserWrite, user_service: UserService = Depends(get_user_service)) -> UserRead:
+@router.post("", status_code=status.HTTP_201_CREATED)
+def create_user(payload: UserWrite, user_service: UserService = Depends(get_user_service)) -> UserRead | None:
     return user_service.create_user(payload)
 
 
-@router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
 def get_user(user_id: int, user_service: UserService = Depends(get_user_service)) -> UserRead:
     try:
         return user_service.get_user_by_id(user_id)

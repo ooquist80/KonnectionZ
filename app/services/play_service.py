@@ -47,7 +47,6 @@ class PlayService:
 
     def play_words(self, game_id, user_id, played_words) -> PlayResult:
         game = self.game_repository.get_by_id(game_id)
-        end_time = None
         if not game:
             raise GameNotFoundError(f"Game with id: {game_id} not found")
         if game.user_id != user_id:
@@ -55,14 +54,13 @@ class PlayService:
         if game.end_time is not None:
             raise GameAlreadyCompletedError(f"Game with id: {game.id} is already completed.")
         result_message, correct_wordset = get_result(game, played_words)
+        self.game_repository.increment_turn_count(game_id=game.id)
         if correct_wordset:
             self.game_repository.add_completed_wordset(game_id, correct_wordset.id)
+            if len(game.completed_wordsets) == len(game.gameset.wordsets) -1:
+                result_message = ResultMessage.COMPLETED
+                self.game_repository.add_game_end_time(game_id=game.id, end_time=datetime.now())
         game = self.game_repository.get_by_id(game_id)
-        if len(game.completed_wordsets) == len(game.gameset.wordsets):
-            result_message = ResultMessage.COMPLETED
-            end_time=datetime.now()
-            self.game_repository.add_game_end_time(game_id=game.id, end_time=end_time)
-
         words_remaining = []
         completed_wordsets = []
         for wordset in game.gameset.wordsets:
@@ -74,8 +72,8 @@ class PlayService:
 
 
         game_status = GameStatus(start_time=game.start_time,
-                                 end_time=end_time,
+                                 end_time=game.end_time,
                                  words_remaining=words_remaining,
                                  wordsets_completed=completed_wordsets,
-                                 turn_count=0)
+                                 turn_count=game.turn_count)
         return PlayResult(game_id=game.id, game_status=game_status, result_message=result_message)

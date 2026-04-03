@@ -1,10 +1,7 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, Response, status, Security
 
 from app.api.deps import get_database_client, get_current_user
 from app.db.client import DatabaseClient
-from app.models.user import UserRead
 from app.models.wordset import WordsetRead, WordsetNotFoundError, WordsetRegisteredInGameError, WordsetWrite
 from app.services.wordset_service import InvalidDifficultyError, WordsetService
 
@@ -15,7 +12,7 @@ def get_wordset_service(database_client: DatabaseClient = Depends(get_database_c
     return WordsetService(database_client)
 
 
-@router.post("", response_model=WordsetRead, status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 def create_wordset(
         payload: WordsetWrite,
         wordset_service: WordsetService = Depends(get_wordset_service)) -> WordsetRead:
@@ -25,12 +22,12 @@ def create_wordset(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
-@router.get("", response_model=list[WordsetRead])
+@router.get("")
 def list_wordsets(wordset_service: WordsetService = Depends(get_wordset_service)) -> list[WordsetRead]:
     return wordset_service.get_all_wordsets()
 
 
-@router.get("/{wordset_id}", response_model=WordsetRead)
+@router.get("/{wordset_id}")
 def get_wordset(
         wordset_id: int,
         wordset_service: WordsetService = Depends(get_wordset_service),
@@ -41,7 +38,7 @@ def get_wordset(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
-@router.put("/{wordset_id}", response_model=WordsetRead)
+@router.put("/{wordset_id}")
 def update_wordset(
         wordset_id: int,
         payload: WordsetWrite,

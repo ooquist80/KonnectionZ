@@ -25,12 +25,15 @@ request:
     resourceOwner:
       username: olle
       password: pass
-    scope: user:play
+    scope: user:play user:admin
     tokenConfig:
       id: credentials
       placement:
         header: Bearer
       source: access_token
+    settings:
+      autoFetchToken: true
+      autoRefreshToken: false
 bundled: false
 extensions:
   bruno:
