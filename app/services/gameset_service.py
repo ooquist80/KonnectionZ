@@ -15,7 +15,7 @@ class GameSetService:
 
     def create_gameset(self, payload: GameSetWrite) -> GameSetRead:
         created_gameset = self.gameset_repository.create(name=payload.name, date=payload.date,
-                                                         wordsets=payload.wordsets)
+                                                         wordset_ids=payload.wordsets)
         return created_gameset
 
     def get_gameset(self, gameset_id: int) -> GameSetRead:
@@ -24,6 +24,10 @@ class GameSetService:
             raise GameSetNotFoundError(f"Gameset with id: {gameset_id} was not found.")
 
         return gameset
+
+    def get_all_gamesets(self) -> List[GameSetRead]:
+        gamesets = self.gameset_repository.get_all()
+        return gamesets
 
     def delete_gameset(self, gameset_id: int) -> None:
         self.gameset_repository.delete(gameset_id)

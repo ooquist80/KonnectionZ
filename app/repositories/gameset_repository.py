@@ -12,7 +12,7 @@ class GameSetRepository:
         self.database_client = database_client
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create(self, date: datetime.datetime, name, wordsets: list[int]) -> GameSetRead:
+    def create(self, date: datetime.datetime, name, wordset_ids: list[int]) -> GameSetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -23,7 +23,7 @@ class GameSetRepository:
                     (date, name)
                 )
                 game_id = cursor.lastrowid
-                data = [(game_id, wordset) for wordset in wordsets]
+                data = [(game_id, wordset_id) for wordset_id in wordset_ids]
                 cursor.executemany(
                     """
                     INSERT INTO gamesets_wordsets (gameset_id, wordset_id)
@@ -31,10 +31,13 @@ class GameSetRepository:
                     """,
                     data
                 )
+                wordsets = []
+                for wordset_id in wordset_ids:
+                    wordsets.append(self.wordset_repository.get_by_id(wordset_id))
             connection.commit()
         return GameSetRead(id=game_id, date=date, name=name, wordsets=wordsets)
 
-    def get_by_id(self, game_id: int) -> GameSetRead | None:
+    def get_by_id(self, gameset_id: int) -> GameSetRead | None:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -43,7 +46,7 @@ class GameSetRepository:
                     FROM gamesets
                     WHERE id = %s
                     """,
-                    (game_id,),
+                    gameset_id
                 )
                 game_row = cursor.fetchone()
 
@@ -55,13 +58,45 @@ class GameSetRepository:
                     FROM gamesets_wordsets
                     WHERE gameset_id = %s
                     """,
-                    (game_id,),
+                    gameset_id
                 )
                 wordset_rows = cursor.fetchall()
                 wordsets = []
                 for wordset_row in wordset_rows:
                     wordsets.append(self.wordset_repository.get_by_id(wordset_row["wordset_id"]))
         return GameSetRead(id=game_row["id"], date=game_row["date"], name=game_row["name"], wordsets=wordsets)
+
+    def get_all(self) -> list[GameSetRead]:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute("""
+                SELECT id, name, date
+                FROM gamesets
+                """)
+                gameset_rows = cursor.fetchall()
+                gamesets = []
+                for gameset_row in gameset_rows:
+                    cursor.execute(
+                        """
+                        SELECT wordset_id
+                        FROM gamesets_wordsets
+                        WHERE gameset_id = %s
+                        """,
+                        gameset_row["id"]
+                    )
+                    wordset_id_rows = cursor.fetchall()
+                    wordsets = []
+                    for wordset_id_row in wordset_id_rows:
+                        wordsets.append(self.wordset_repository.get_by_id(wordset_id_row["wordset_id"]))
+                    gamesets.append(GameSetRead(id=gameset_row["id"],
+                                                name=gameset_row["name"],
+                                                date=gameset_row["date"],
+                                                wordsets=wordsets))
+            connection.commit()
+        return gamesets
+
+
+
 
     def delete(self, game_id: int) -> bool:
         with self.database_client.connect() as connection:

@@ -6,7 +6,7 @@ from starlette import status
 from app.api.deps import get_database_client, get_current_user
 from app.db.client import DatabaseClient
 from app.models.game import GameBelongsToAnotherUserError
-from app.models.play import PlayResult, GameAlreadyCompletedError
+from app.models.play import PlayResult, GameAlreadyCompletedError, PlayGameSet
 from app.models.user import UserRead
 from app.services.play_service import PlayService
 
@@ -16,13 +16,18 @@ router = APIRouter(prefix="/play", tags=["play"])
 def get_play_service(database_client: DatabaseClient = Depends(get_database_client)) -> PlayService:
     return PlayService(database_client)
 
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_todays_game(current_user: UserRead = Depends(get_current_user),
+                       play_service: PlayService = Depends(get_play_service)) -> PlayResult:
+    play_result = play_service.start_game(gameset_id=1, user_id=current_user.id)
+    return play_result
 
 @router.post("/{gameset_id}", status_code=status.HTTP_201_CREATED)
 def create_game(gameset_id: int,
                 current_user: Annotated[UserRead, Depends(get_current_user)],
                 play_service: PlayService = Depends(get_play_service)
                 ) -> PlayResult:
-    play_result = play_service.start_game(gameset_id, current_user.id)
+    play_result = play_service.start_game(gameset_id=gameset_id, user_id=current_user.id)
     return play_result
 
 
@@ -40,3 +45,9 @@ def play_words(game_id: int,
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
     return play_result
+
+@router.get("/gamesets")
+def get_gamesets(current_user: UserRead = Depends(get_current_user),
+                  play_service: PlayService = Depends(get_play_service)) -> list[PlayGameSet]:
+    play_gamesets = play_service.get_available_gamesets()
+    return play_gamesets

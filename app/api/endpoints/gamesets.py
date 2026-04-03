@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status, Security
 from starlette.status import HTTP_404_NOT_FOUND
 
@@ -29,3 +31,7 @@ def get_gameset(gameset_id: int,
         return gameset_service.get_gameset(gameset_id)
     except GameSetNotFoundError as exception:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
+
+@router.get("/")
+def get_gamesets(gameset_service: GameSetService = Depends(get_gameset_service)) -> List[GameSetRead]:
+    return gameset_service.get_all_gamesets()

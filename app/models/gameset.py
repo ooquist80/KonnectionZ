@@ -7,7 +7,7 @@ class GameSetNotFoundError(Exception):
     pass
 
 class GameSetRead(BaseModel):
-    id: int | None = None
+    id: int
     date: datetime.datetime
     name: str = Field(title="The name of the game")
     wordsets: list[WordsetRead] = Field(min_length=4)

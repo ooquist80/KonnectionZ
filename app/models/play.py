@@ -26,4 +26,8 @@ class PlayResult(BaseModel):
     game_status: GameStatus
     result_message: ResultMessage | None = None
 
+class PlayGameSet(BaseModel):
+    id: int
+    name: str
+
 

@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Literal
 
 from app.db.client import DatabaseClient
 from app.models.game import GameBelongsToAnotherUserError, GameNotFoundError, GameRead
+from app.models.play import GameStatus, PlayResult, GameAlreadyCompletedError, ResultMessage, PlayGameSet
 from app.models.wordset import WordsetRead
-from app.models.play import GameStatus, PlayResult, GameAlreadyCompletedError, ResultMessage
 from app.repositories.game_repository import GameRepository
+from app.repositories.gameset_repository import GameSetRepository
 
 
 def get_correct_word_count(words, played_words):
@@ -30,6 +30,7 @@ def get_result(game: GameRead, played_words) -> tuple[ResultMessage, WordsetRead
 class PlayService:
     def __init__(self, database_client: DatabaseClient):
         self.game_repository = GameRepository(database_client)
+        self.gameset_repository = GameSetRepository(database_client)
 
     def start_game(self, gameset_id, user_id) -> PlayResult:
         game = self.game_repository.create(gameset_id, user_id)
@@ -57,7 +58,7 @@ class PlayService:
         self.game_repository.increment_turn_count(game_id=game.id)
         if correct_wordset:
             self.game_repository.add_completed_wordset(game_id, correct_wordset.id)
-            if len(game.completed_wordsets) == len(game.gameset.wordsets) -1:
+            if len(game.completed_wordsets) == len(game.gameset.wordsets) - 1:
                 result_message = ResultMessage.COMPLETED
                 self.game_repository.add_game_end_time(game_id=game.id, end_time=datetime.now())
         game = self.game_repository.get_by_id(game_id)
@@ -70,10 +71,16 @@ class PlayService:
             else:
                 completed_wordsets.append(wordset)
 
-
         game_status = GameStatus(start_time=game.start_time,
                                  end_time=game.end_time,
                                  words_remaining=words_remaining,
                                  wordsets_completed=completed_wordsets,
                                  turn_count=game.turn_count)
         return PlayResult(game_id=game.id, game_status=game_status, result_message=result_message)
+
+    def get_available_gamesets(self):
+        gamesets = self.gameset_repository.get_all()
+        play_gamesets = []
+        for gameset in gamesets:
+            play_gamesets.append(PlayGameSet(id=gameset.id, name=gameset.name))
+        return play_gamesets
