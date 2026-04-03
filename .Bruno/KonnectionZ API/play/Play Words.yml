@@ -10,16 +10,16 @@ http:
   url: "{{baseUrl}}/play/:game_id"
   params:
     - name: game_id
-      value: "7"
+      value: "4"
       type: path
   body:
     type: json
     data: |-
       [
-        "January",
-            "August",
-            "November",
-            "December"
+           "12",
+            "31",
+            "11",
+            "2"
       ]
   auth: inherit
 

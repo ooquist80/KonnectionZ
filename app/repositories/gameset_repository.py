@@ -42,15 +42,15 @@ class GameSetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, name, `date`
+                    SELECT id, daily, name, `date`
                     FROM gamesets
                     WHERE id = %s
                     """,
                     gameset_id
                 )
-                game_row = cursor.fetchone()
+                gameset_row = cursor.fetchone()
 
-                if game_row is None:
+                if gameset_row is None:
                     return None
                 cursor.execute(
                     """
@@ -64,13 +64,13 @@ class GameSetRepository:
                 wordsets = []
                 for wordset_row in wordset_rows:
                     wordsets.append(self.wordset_repository.get_by_id(wordset_row["wordset_id"]))
-        return GameSetRead(id=game_row["id"], date=game_row["date"], name=game_row["name"], wordsets=wordsets)
+        return GameSetRead(id=gameset_row["id"], daily=bool(gameset_row["daily"]), date=gameset_row["date"], name=gameset_row["name"], wordsets=wordsets)
 
     def get_all(self) -> list[GameSetRead]:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute("""
-                SELECT id, name, date
+                SELECT id, daily, name, date
                 FROM gamesets
                 """)
                 gameset_rows = cursor.fetchall()
@@ -89,6 +89,7 @@ class GameSetRepository:
                     for wordset_id_row in wordset_id_rows:
                         wordsets.append(self.wordset_repository.get_by_id(wordset_id_row["wordset_id"]))
                     gamesets.append(GameSetRead(id=gameset_row["id"],
+                                                daily=bool(gameset_row["daily"]),
                                                 name=gameset_row["name"],
                                                 date=gameset_row["date"],
                                                 wordsets=wordsets))
@@ -98,16 +99,16 @@ class GameSetRepository:
 
 
 
-    def delete(self, game_id: int) -> bool:
+    def delete(self, gameset_id: int) -> bool:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     DELETE
-                    FROM games
+                    FROM gamesets
                     WHERE id = %s
                     """,
-                    (game_id,),
+                    gameset_id
                 )
                 deleted = cursor.rowcount > 0
 
@@ -116,4 +117,18 @@ class GameSetRepository:
                 return deleted
             else:
                 connection.rollback()
-                raise GameSetNotFoundError(game_id)
+                raise GameSetNotFoundError(gameset_id)
+
+    def get_latest_daily_gameset_id(self) -> int:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute("""
+                    SELECT id
+                    FROM gamesets
+                    WHERE daily = 1
+                    ORDER BY date DESC
+                    LIMIT 1
+                    """)
+                latest_daily_game_id=cursor.fetchone()["id"]
+            connection.commit()
+        return latest_daily_game_id

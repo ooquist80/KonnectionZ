@@ -9,10 +9,12 @@ class GameSetNotFoundError(Exception):
 class GameSetRead(BaseModel):
     id: int
     date: datetime.datetime
+    daily: bool
     name: str = Field(title="The name of the game")
     wordsets: list[WordsetRead] = Field(min_length=4)
 
 class GameSetWrite(BaseModel):
     date: datetime.datetime = datetime.datetime.now()
+    daily: bool
     name: str = Field(title="The name of the game")
     wordsets: list[int] = Field(min_length=4)

@@ -22,7 +22,7 @@ def get_me(current_user: Annotated[UserRead, Depends(get_current_user)]) -> User
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_user(payload: UserWrite, user_service: UserService = Security(get_current_user, scopes = ["user:admin"])) -> UserRead | None:
+def create_user(payload: UserWrite, user_service: UserService = Depends(get_user_service)) -> UserRead | None:
     return user_service.create_user(payload)
 
 

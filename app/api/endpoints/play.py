@@ -17,9 +17,9 @@ def get_play_service(database_client: DatabaseClient = Depends(get_database_clie
     return PlayService(database_client)
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_todays_game(current_user: UserRead = Depends(get_current_user),
+def create_or_resume_daily_game(current_user: UserRead = Depends(get_current_user),
                        play_service: PlayService = Depends(get_play_service)) -> PlayResult:
-    play_result = play_service.start_game(gameset_id=1, user_id=current_user.id)
+    play_result = play_service.start_or_resume_daily_game(user_id=current_user.id)
     return play_result
 
 @router.post("/{gameset_id}", status_code=status.HTTP_201_CREATED)

@@ -15,7 +15,7 @@ class GameRepository:
         self.database_client = database_client
         self.gameset_repository = GameSetRepository(database_client)
 
-    def create(self, user_id: int, gameset_id) -> GameRead:
+    def create(self, gameset_id: int, user_id: int) -> GameRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 gameset = self.gameset_repository.get_by_id(gameset_id)
@@ -69,6 +69,43 @@ class GameRepository:
                           start_time=game_row["start_time"],
                           end_time=game_row["end_time"],
                           completed_wordsets=completed_wordset_ids)
+
+    def get_by_user_id(self, user_id: int) -> list[GameRead]:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT id, user_id, gameset_id, turn_count, start_time, end_time
+                    FROM games
+                    WHERE user_id = %s
+                    """, user_id
+                )
+                game_rows = cursor.fetchall()
+                games = []
+                for game_row in game_rows:
+                    cursor.execute(
+                        """
+                        SELECT wordset_id 
+                        FROM games_wordsets 
+                        WHERE game_id = %s
+                        """, (game_row["id"],)
+                    )
+                    wordset_rows = cursor.fetchall()
+                    gameset = self.gameset_repository.get_by_id(game_row["gameset_id"])
+                    if gameset is None:
+                        logger.warning(f"No gameset found for game_id {game_row['id']}")
+                    else:
+                        completed_wordset_ids = []
+                        for wordset_row in wordset_rows:
+                            completed_wordset_ids.append(wordset_row["wordset_id"])
+                        games.append(GameRead(id=game_row["id"],
+                                              user_id=game_row["user_id"],
+                                              gameset=gameset,
+                                              turn_count=game_row["turn_count"],
+                                              start_time=game_row["start_time"],
+                                              end_time=game_row["end_time"],
+                                              completed_wordsets=completed_wordset_ids))
+        return games
 
 
     def get_all(self) -> list[GameRead]:

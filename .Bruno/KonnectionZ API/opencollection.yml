@@ -24,7 +24,7 @@ request:
       placement: body
     resourceOwner:
       username: olle
-      password: pass
+      password: Sharp/1980!
     scope: user:play user:admin
     tokenConfig:
       id: credentials

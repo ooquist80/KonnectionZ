@@ -37,6 +37,6 @@ def get_settings() -> Settings:
         # Create with 'openssl rand -hex 32'
         access_token_auth_key=os.getenv("ACCESS_TOKEN_AUTH_KEY",
                                         "c083e980e6a9a9a5a9d9ed274c2a6120b9e05335a87f37649bf259885177f4c8"),
-        access_token_expires_in=int(os.getenv("ACCESS_TOKEN_EXPIRES_IN", 30)),
+        access_token_expires_in=int(os.getenv("ACCESS_TOKEN_EXPIRES_IN", 60*12)),
         access_token_algorithm=os.getenv("ACCESS_TOKEN_ALGORITHM","HS256")
     )

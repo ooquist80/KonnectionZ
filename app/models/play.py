@@ -9,6 +9,7 @@ class GameAlreadyCompletedError(Exception):
     pass
 
 class GameStatus(BaseModel):
+    game_name: str
     start_time: datetime
     end_time: datetime | None = None
     words_remaining: list[str]
