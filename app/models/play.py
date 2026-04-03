@@ -30,5 +30,6 @@ class PlayResult(BaseModel):
 class PlayGameSet(BaseModel):
     id: int
     name: str
+    daily: bool
 
 

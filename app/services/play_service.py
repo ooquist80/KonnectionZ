@@ -98,5 +98,5 @@ class PlayService:
         gamesets = self.gameset_repository.get_all()
         play_gamesets = []
         for gameset in gamesets:
-            play_gamesets.append(PlayGameSet(id=gameset.id, name=gameset.name))
+            play_gamesets.append(PlayGameSet(id=gameset.id, name=gameset.name, daily=gameset.daily))
         return play_gamesets
