@@ -13,9 +13,9 @@ class GameSetService:
         self.gameset_repository = GameSetRepository(database_client)
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create_gameset(self, payload: GameSetWrite) -> GameSetRead:
-        created_gameset = self.gameset_repository.create(name=payload.name, date=payload.date,
-                                                         wordset_ids=payload.wordsets)
+    def create_gameset(self, gameset: GameSetWrite) -> GameSetRead:
+        created_gameset = self.gameset_repository.create(name=gameset.name, date=gameset.date, daily=gameset.daily,
+                                                         wordset_ids=gameset.wordsets)
         return created_gameset
 
     def get_gameset(self, gameset_id: int) -> GameSetRead:

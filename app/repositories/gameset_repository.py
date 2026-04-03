@@ -12,15 +12,15 @@ class GameSetRepository:
         self.database_client = database_client
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create(self, date: datetime.datetime, name, wordset_ids: list[int]) -> GameSetRead:
+    def create(self, date: datetime.datetime, daily: bool, name: str, wordset_ids: list[int]) -> GameSetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO gamesets (date, name)
-                    VALUES (%s, %s)
+                    INSERT INTO gamesets (date, daily, name)
+                    VALUES (%s, %s, %s)
                     """,
-                    (date, name)
+                    (date, daily, name)
                 )
                 game_id = cursor.lastrowid
                 data = [(game_id, wordset_id) for wordset_id in wordset_ids]
@@ -35,7 +35,7 @@ class GameSetRepository:
                 for wordset_id in wordset_ids:
                     wordsets.append(self.wordset_repository.get_by_id(wordset_id))
             connection.commit()
-        return GameSetRead(id=game_id, date=date, name=name, wordsets=wordsets)
+        return GameSetRead(id=game_id, date=date, daily=daily, name=name, wordsets=wordsets)
 
     def get_by_id(self, gameset_id: int) -> GameSetRead | None:
         with self.database_client.connect() as connection:

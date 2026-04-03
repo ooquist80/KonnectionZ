@@ -27,7 +27,7 @@ def create_game(gameset_id: int,
                 current_user: Annotated[UserRead, Depends(get_current_user)],
                 play_service: PlayService = Depends(get_play_service)
                 ) -> PlayResult:
-    play_result = play_service.start_game(gameset_id=gameset_id, user_id=current_user.id)
+    play_result = play_service.start_or_resume_game(gameset_id=gameset_id, user_id=current_user.id)
     return play_result
 
 

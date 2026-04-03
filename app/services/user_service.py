@@ -20,7 +20,7 @@ class UserService:
         self.password_hasher = PasswordHash.recommended()
         self.settings = get_settings()
 
-    def create_user(self, user_write: UserWrite) -> UserRead | None:
+    def create(self, user_write: UserWrite) -> UserRead | None:
         hashed_password = self.password_hasher.hash(user_write.password)
         try:
             created_user = self.user_repository.create(user_write, hashed_password)
@@ -37,7 +37,7 @@ class UserService:
         else:
             return created_user
 
-    def get_user_by_id(self, user_id: int) -> UserRead:
+    def get_by_id(self, user_id: int) -> UserRead:
         user = self.user_repository.get_by_id(user_id)
         if user is None:
             raise UserNotFoundError(f"User with id: {user_id} was not found.")
@@ -70,3 +70,9 @@ class UserService:
                     headers={"WWW-Authenticate": f'Bearer scope="{scope}"'},
                 )
         return user_record
+
+    def get_all(self) -> list[UserRead]:
+        return self.user_repository.get_all()
+
+    def delete(self, user_id):
+        self.user_repository.delete(user_id)

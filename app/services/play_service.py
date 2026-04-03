@@ -32,15 +32,18 @@ class PlayService:
         self.game_repository = GameRepository(database_client)
         self.gameset_repository = GameSetRepository(database_client)
 
-    def start_or_resume_daily_game(self, user_id) -> PlayResult:
+    def start_or_resume_daily_game(self, user_id: int):
         daily_gameset_id = self.gameset_repository.get_latest_daily_gameset_id()
+        return self.start_or_resume_game(user_id=user_id, gameset_id=daily_gameset_id)
+
+    def start_or_resume_game(self, user_id: int, gameset_id : int) -> PlayResult:
         played_games = self.game_repository.get_by_user_id(user_id=user_id)
         game = None
         for played_game in played_games:
-            if played_game.gameset.id == daily_gameset_id:
+            if played_game.gameset.id == gameset_id:
                 game = played_game
         if not game:
-            game = self.game_repository.create(gameset_id=daily_gameset_id, user_id=user_id)
+            game = self.game_repository.create(gameset_id=gameset_id, user_id=user_id)
         words_remaining = []
         completed_wordsets = []
         for wordset in game.gameset.wordsets:
@@ -55,24 +58,7 @@ class PlayService:
                                  end_time=game.end_time,
                                  words_remaining=words_remaining,
                                  wordsets_completed=completed_wordsets,
-                                 turn_count=0)
-        return PlayResult(game_id=game.id, game_status=game_status)
-
-    def start_game(self, gameset_id: int, user_id: int) -> PlayResult:
-        game = self.game_repository.create(gameset_id=gameset_id, user_id=user_id)
-        words_remaining = []
-        for wordset in game.gameset.wordsets:
-            for word in wordset.words:
-                words_remaining.append(word.word)
-        #Randomize the list order
-        random.shuffle(words_remaining)
-
-        game_status = GameStatus(game_name=game.gameset.name,
-                                 start_time=game.start_time,
-                                 end_time=game.end_time,
-                                 words_remaining=words_remaining,
-                                 wordsets_completed=[],
-                                 turn_count=0)
+                                 turn_count=game.turn_count)
         return PlayResult(game_id=game.id, game_status=game_status)
 
     def play_words(self, game_id, user_id, played_words) -> PlayResult:
@@ -99,7 +85,7 @@ class PlayService:
                     words_remaining.append(word.word)
             else:
                 completed_wordsets.append(wordset)
-
+        random.shuffle(words_remaining)
         game_status = GameStatus(game_name=game.gameset.name,
                                  start_time=game.start_time,
                                  end_time=game.end_time,

@@ -1,6 +1,6 @@
 from pymysql.cursors import DictCursor
 
-from app.models.user import UserRead, UserWrite, UserRecord
+from app.models.user import UserRead, UserWrite, UserRecord, UserNotFoundError
 from app.db.client import DatabaseClient
 
 
@@ -59,3 +59,33 @@ class UserRepository:
         scopes = user_row["scopes"].split(",")
         return UserRecord(id=user_row["id"], email=user_row["email"], username=user_row["username"],
                           password=user_row["password"], scopes=scopes)
+
+    def get_all(self) -> list[UserRead]:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT id, email, username, scopes
+                    FROM users
+                    """
+                )
+                user_rows = cursor.fetchall()
+                users = []
+                scopes = user_rows[0]["scopes"].split(",")
+                for user_row in user_rows:
+                    users.append(UserRead(id=user_row["id"], email=user_row["email"], username=user_row["username"],
+                                          scopes=scopes))
+            connection.commit()
+        return users
+
+    def delete(self, user_id) -> None:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute("""
+                DELETE FROM users
+                WHERE id = %s
+                """, user_id)
+                if cursor.rowcount == 0:
+                    raise UserNotFoundError(f"User with id {user_id} was not found.")
+            connection.commit()
+        return
