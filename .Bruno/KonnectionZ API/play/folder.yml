@@ -1,7 +1,7 @@
 info:
   name: play
   type: folder
-  seq: 7
+  seq: 1
 
 request:
   auth: inherit

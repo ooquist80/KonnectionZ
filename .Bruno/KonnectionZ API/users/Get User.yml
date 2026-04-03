@@ -10,9 +10,25 @@ http:
   url: "{{baseUrl}}/users/:user_id"
   params:
     - name: user_id
-      value: "1"
+      value: ""
       type: path
-  auth: inherit
+  auth:
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: auth/token
+    refreshTokenUrl: "{{oauth_refresh_url}}"
+    credentials:
+      clientId: "{{oauth_client_id}}"
+      clientSecret: "{{oauth_client_secret}}"
+      placement: header
+    scope: user:play user:admin
+    tokenConfig:
+      placement:
+        header: Bearer
+      source: access_token
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: true
 
 settings:
   encodeUrl: true
@@ -42,7 +58,8 @@ examples:
           {
             "id": 0,
             "email": "",
-            "username": ""
+            "username": "",
+            "scopes": []
           }
   - name: 422 Response
     description: Validation Error

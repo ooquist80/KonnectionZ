@@ -12,11 +12,27 @@ http:
     type: json
     data: |-
       {
-        "date": "2026-03-30",
-        "name": "TestGame",
-        "wordsets": [1,2,3,4]
+        "date": "",
+        "name": "",
+        "wordsets": []
       }
-  auth: inherit
+  auth:
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: auth/token
+    refreshTokenUrl: "{{oauth_refresh_url}}"
+    credentials:
+      clientId: "{{oauth_client_id}}"
+      clientSecret: "{{oauth_client_secret}}"
+      placement: header
+    scope: user:play user:admin
+    tokenConfig:
+      placement:
+        header: Bearer
+      source: access_token
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: true
 
 settings:
   encodeUrl: true
@@ -51,7 +67,19 @@ examples:
             "id": "",
             "date": "",
             "name": "",
-            "wordsets": []
+            "wordsets": [
+              {
+                "id": 0,
+                "category": "",
+                "difficulty": 0,
+                "words": [
+                  {
+                    "id": 0,
+                    "word": ""
+                  }
+                ]
+              }
+            ]
           }
   - name: 422 Response
     description: Validation Error

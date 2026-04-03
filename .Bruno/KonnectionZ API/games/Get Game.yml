@@ -1,7 +1,7 @@
 info:
   name: Get Game
   type: http
-  seq: 3
+  seq: 1
   tags:
     - games
 
@@ -10,9 +10,25 @@ http:
   url: "{{baseUrl}}/games/:game_id"
   params:
     - name: game_id
-      value: "1"
+      value: ""
       type: path
-  auth: inherit
+  auth:
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: auth/token
+    refreshTokenUrl: "{{oauth_refresh_url}}"
+    credentials:
+      clientId: "{{oauth_client_id}}"
+      clientSecret: "{{oauth_client_secret}}"
+      placement: header
+    scope: user:play user:admin
+    tokenConfig:
+      placement:
+        header: Bearer
+      source: access_token
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: true
 
 settings:
   encodeUrl: true
@@ -40,12 +56,29 @@ examples:
         type: json
         data: |-
           {
-            "id": "",
+            "id": 0,
             "user_id": 0,
-            "gameset_id": 0,
+            "gameset": {
+              "id": "",
+              "date": "",
+              "name": "",
+              "wordsets": [
+                {
+                  "id": 0,
+                  "category": "",
+                  "difficulty": 0,
+                  "words": [
+                    {
+                      "id": 0,
+                      "word": ""
+                    }
+                  ]
+                }
+              ]
+            },
             "start_time": "",
             "end_time": "",
-            "completed_wordsets": ""
+            "completed_wordsets": []
           }
   - name: 422 Response
     description: Validation Error

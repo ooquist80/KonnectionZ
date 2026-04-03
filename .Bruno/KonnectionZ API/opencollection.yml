@@ -16,8 +16,21 @@ config:
 
 request:
   auth:
-    type: bearer
-    token: "{{token}}"
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: http://localhost:8000/auth/token
+    credentials:
+      clientId: fsfdsfsd
+      placement: body
+    resourceOwner:
+      username: olle
+      password: pass
+    scope: user:play
+    tokenConfig:
+      id: credentials
+      placement:
+        header: Bearer
+      source: access_token
 bundled: false
 extensions:
   bruno:

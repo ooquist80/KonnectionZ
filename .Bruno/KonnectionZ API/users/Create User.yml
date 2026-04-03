@@ -12,12 +12,28 @@ http:
     type: json
     data: |-
       {
-        "email": "olle@folle.com",
-        "username": "olle",
-        "password": "pass"
-        
+        "email": "",
+        "username": "",
+        "password": "",
+        "scopes": ""
       }
-  auth: inherit
+  auth:
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: auth/token
+    refreshTokenUrl: "{{oauth_refresh_url}}"
+    credentials:
+      clientId: "{{oauth_client_id}}"
+      clientSecret: "{{oauth_client_secret}}"
+      placement: header
+    scope: user:play user:admin
+    tokenConfig:
+      placement:
+        header: Bearer
+      source: access_token
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: true
 
 settings:
   encodeUrl: true
@@ -37,7 +53,8 @@ examples:
           {
             "email": "",
             "username": "",
-            "password": ""
+            "password": "",
+            "scopes": ""
           }
     response:
       status: 201
@@ -51,7 +68,8 @@ examples:
           {
             "id": 0,
             "email": "",
-            "username": ""
+            "username": "",
+            "scopes": []
           }
   - name: 422 Response
     description: Validation Error
@@ -64,7 +82,8 @@ examples:
           {
             "email": "",
             "username": "",
-            "password": ""
+            "password": "",
+            "scopes": ""
           }
     response:
       status: 422

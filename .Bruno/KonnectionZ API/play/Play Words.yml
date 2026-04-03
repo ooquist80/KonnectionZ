@@ -2,25 +2,124 @@ info:
   name: Play Words
   type: http
   seq: 2
+  tags:
+    - play
 
 http:
   method: PUT
   url: "{{baseUrl}}/play/:game_id"
   params:
     - name: game_id
-      value: "1"
+      value: ""
       type: path
   body:
     type: json
     data: |-
-      [  "January",
-            "August",
-            "November",
-            "December"]
-  auth: inherit
+      [
+        {}
+      ]
+  auth:
+    type: oauth2
+    flow: resource_owner_password_credentials
+    accessTokenUrl: auth/token
+    refreshTokenUrl: "{{oauth_refresh_url}}"
+    credentials:
+      clientId: "{{oauth_client_id}}"
+      clientSecret: "{{oauth_client_secret}}"
+      placement: header
+    scope: user:play user:admin
+    tokenConfig:
+      placement:
+        header: Bearer
+      source: access_token
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: true
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+examples:
+  - name: 202 Response
+    description: Successful Response
+    request:
+      url: "{{baseUrl}}/play/:game_id"
+      method: PUT
+      params:
+        - name: game_id
+          value: ""
+          type: path
+      body:
+        type: json
+        data: |-
+          [
+            {}
+          ]
+    response:
+      status: 202
+      statusText: Accepted
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "game_id": 0,
+            "game_status": {
+              "start_time": "",
+              "end_time": "",
+              "words_remaining": [],
+              "wordsets_completed": [
+                {
+                  "id": 0,
+                  "category": "",
+                  "difficulty": 0,
+                  "words": [
+                    {
+                      "id": 0,
+                      "word": ""
+                    }
+                  ]
+                }
+              ],
+              "turn_count": 0
+            },
+            "result_message": ""
+          }
+  - name: 422 Response
+    description: Validation Error
+    request:
+      url: "{{baseUrl}}/play/:game_id"
+      method: PUT
+      params:
+        - name: game_id
+          value: ""
+          type: path
+      body:
+        type: json
+        data: |-
+          [
+            {}
+          ]
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "detail": [
+              {
+                "loc": [],
+                "msg": "",
+                "type": ""
+              }
+            ]
+          }
