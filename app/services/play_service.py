@@ -1,9 +1,30 @@
 from datetime import datetime
+from typing import Literal
 
 from app.db.client import DatabaseClient
-from app.models.game import GameBelongsToAnotherUserError, GameNotFoundError
+from app.models.game import GameBelongsToAnotherUserError, GameNotFoundError, GameRead
+from app.models.wordset import WordsetRead
 from app.models.play import GameStatus, PlayResult, GameAlreadyCompletedError, ResultMessage
 from app.repositories.game_repository import GameRepository
+
+
+def get_correct_word_count(words, played_words):
+    count = 0
+    for word in words:
+        if word.word in played_words:
+            count += 1
+    return count
+
+
+def get_result(game: GameRead, played_words) -> tuple[ResultMessage, WordsetRead | None]:
+    for wordset in game.gameset.wordsets:
+        if wordset.id not in game.completed_wordsets:
+            correct_word_count = get_correct_word_count(wordset.words, played_words)
+            if correct_word_count == len(wordset.words):
+                return ResultMessage.CORRECT, wordset
+            elif correct_word_count == len(wordset.words) - 1:
+                return ResultMessage.ALMOST_CORRECT, None
+    return ResultMessage.INCORRECT, None
 
 
 class PlayService:
@@ -26,38 +47,35 @@ class PlayService:
 
     def play_words(self, game_id, user_id, played_words) -> PlayResult:
         game = self.game_repository.get_by_id(game_id)
+        end_time = None
         if not game:
             raise GameNotFoundError(f"Game with id: {game_id} not found")
         if game.user_id != user_id:
             raise GameBelongsToAnotherUserError(f"Game with id: {game_id} belongs to another user")
         if game.end_time is not None:
             raise GameAlreadyCompletedError(f"Game with id: {game.id} is already completed.")
-        for wordset in game.gameset.wordsets:
-            correct_word_count = 0
-            if wordset not in game.completed_wordsets:
-                for word in wordset.words:
-                    if word.word in played_words:
-                        correct_word_count += 1
-                if correct_word_count == len(wordset.words):
-                    self.game_repository.add_completed_wordset(game_id=game.id, wordset_id=wordset.id)
-                    result_message = ResultMessage.CORRECT
-                elif correct_word_count == len(wordset.words) - 1:
-                    result_message = ResultMessage.ALMOST_CORRECT
-                else:
-                    result_message = ResultMessage.INCORRECT
+        result_message, correct_wordset = get_result(game, played_words)
+        if correct_wordset:
+            self.game_repository.add_completed_wordset(game_id, correct_wordset.id)
         game = self.game_repository.get_by_id(game_id)
         if len(game.completed_wordsets) == len(game.gameset.wordsets):
             result_message = ResultMessage.COMPLETED
-            self.game_repository.add_game_end_time(game_id=game.id, end_time=datetime.now())
+            end_time=datetime.now()
+            self.game_repository.add_game_end_time(game_id=game.id, end_time=end_time)
 
         words_remaining = []
+        completed_wordsets = []
         for wordset in game.gameset.wordsets:
             if wordset.id not in game.completed_wordsets:
                 for word in wordset.words:
                     words_remaining.append(word.word)
+            else:
+                completed_wordsets.append(wordset)
+
+
         game_status = GameStatus(start_time=game.start_time,
-                                 end_time=game.end_time,
+                                 end_time=end_time,
                                  words_remaining=words_remaining,
-                                 wordsets_completed=[],
+                                 wordsets_completed=completed_wordsets,
                                  turn_count=0)
         return PlayResult(game_id=game.id, game_status=game_status, result_message=result_message)

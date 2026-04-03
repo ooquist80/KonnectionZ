@@ -5,7 +5,18 @@ info:
 
 http:
   method: PUT
-  url: "{{baseUrl}}/play"
+  url: "{{baseUrl}}/play/:game_id"
+  params:
+    - name: game_id
+      value: "1"
+      type: path
+  body:
+    type: json
+    data: |-
+      [  "January",
+            "August",
+            "November",
+            "December"]
   auth: inherit
 
 settings:

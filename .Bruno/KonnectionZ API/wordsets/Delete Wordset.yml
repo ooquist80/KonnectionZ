@@ -10,7 +10,7 @@ http:
   url: "{{baseUrl}}/wordsets/:wordset_id"
   params:
     - name: wordset_id
-      value: ""
+      value: "12"
       type: path
   auth: inherit
 
