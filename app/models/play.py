@@ -31,5 +31,8 @@ class PlayGameSet(BaseModel):
     id: int
     name: str
     daily: bool
+    turn_count: int | None
+    start_time: datetime | None
+    end_time: datetime | None
 
 

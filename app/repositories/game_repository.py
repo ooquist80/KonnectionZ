@@ -182,7 +182,3 @@ class GameRepository:
                     game_id
                 )
             connection.commit()
-
-
-
-

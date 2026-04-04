@@ -49,5 +49,5 @@ def play_words(game_id: int,
 @router.get("/gamesets")
 def get_gamesets(current_user: UserRead = Depends(get_current_user),
                   play_service: PlayService = Depends(get_play_service)) -> list[PlayGameSet]:
-    play_gamesets = play_service.get_available_gamesets()
+    play_gamesets = play_service.get_available_gamesets(user_id=current_user.id)
     return play_gamesets

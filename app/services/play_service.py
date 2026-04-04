@@ -6,6 +6,7 @@ from app.models.play import GameStatus, PlayResult, GameAlreadyCompletedError, R
 from app.models.wordset import WordsetRead
 from app.repositories.game_repository import GameRepository
 from app.repositories.gameset_repository import GameSetRepository
+from app.repositories.play_repository import PlayRepository
 
 
 def get_correct_word_count(words, played_words):
@@ -31,6 +32,7 @@ class PlayService:
     def __init__(self, database_client: DatabaseClient):
         self.game_repository = GameRepository(database_client)
         self.gameset_repository = GameSetRepository(database_client)
+        self.play_repository = PlayRepository(database_client)
 
     def start_or_resume_daily_game(self, user_id: int):
         daily_gameset_id = self.gameset_repository.get_latest_daily_gameset_id()
@@ -94,9 +96,6 @@ class PlayService:
                                  turn_count=game.turn_count)
         return PlayResult(game_id=game.id, game_status=game_status, result_message=result_message)
 
-    def get_available_gamesets(self):
-        gamesets = self.gameset_repository.get_all()
-        play_gamesets = []
-        for gameset in gamesets:
-            play_gamesets.append(PlayGameSet(id=gameset.id, name=gameset.name, daily=gameset.daily))
-        return play_gamesets
+    def get_available_gamesets(self, user_id: int):
+        return self.play_repository.get_play_gameset(user_id=user_id)
+
