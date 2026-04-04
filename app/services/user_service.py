@@ -76,3 +76,23 @@ class UserService:
 
     def delete(self, user_id):
         self.user_repository.delete(user_id)
+
+    def update(self, user_id: int, user_write: UserWrite, change_password: bool):
+        hashed_password = self.password_hasher.hash(user_write.password)
+        try:
+            created_user = self.user_repository.update_by_id(user_id, user_write, hashed_password, change_password)
+        except IntegrityError as error:
+            if error.args[0] == 1062 and "for key 'username'" in error.args[1]:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail=f"User with username: {user_write.username} already exists.") from error
+            elif error.args[0] == 1062 and "for key 'email'" in error.args[1]:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail=f"User with email: {user_write.email} already exists.") from error
+        except Exception as error:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail="An unexpected error occurred while creating the user.") from error
+        else:
+            return created_user
+        if user is None:
+            raise UserNotFoundError(f"User with id: {user_id} was not found.")
+        return user

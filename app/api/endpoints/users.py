@@ -41,6 +41,17 @@ def get_user(user_id: int,
     except UserNotFoundError as exception:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
 
+@router.put("/{user_id}")
+def update_user(user_id: int,
+                change_password: bool,
+                user_write: UserWrite,
+                user_service: UserService = Depends(get_user_service),
+                current_user: UserRead = Security(get_current_user, scopes = ["user:admin"])):
+    try:
+        return user_service.update(user_id, user_write, change_password)
+    except UserNotFoundError as exception:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
+
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int,
                 user_service: UserService = Depends(get_user_service),
