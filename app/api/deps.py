@@ -29,7 +29,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
                      security_scopes: SecurityScopes) -> UserRead:
     user_record = user_service.get_current_user(security_scopes, token)
     return UserRead(id=user_record.id, username=user_record.username, email=user_record.email,
-                    scopes=user_record.scopes)
+                    avatar=user_record.avatar ,scopes=user_record.scopes)
 
 def hash_password(password: str) -> str:
     return password_hasher.hash(password)

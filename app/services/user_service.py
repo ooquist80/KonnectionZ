@@ -80,7 +80,7 @@ class UserService:
     def update(self, user_id: int, user_write: UserWrite, change_password: bool):
         hashed_password = self.password_hasher.hash(user_write.password)
         try:
-            created_user = self.user_repository.update_by_id(user_id, user_write, hashed_password, change_password)
+            updated_user = self.user_repository.update_by_id(user_id, user_write, hashed_password, change_password)
         except IntegrityError as error:
             if error.args[0] == 1062 and "for key 'username'" in error.args[1]:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -92,7 +92,12 @@ class UserService:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail="An unexpected error occurred while creating the user.") from error
         else:
-            return created_user
-        if user is None:
-            raise UserNotFoundError(f"User with id: {user_id} was not found.")
-        return user
+            return updated_user
+
+    def update_avatar(self, user_id: int, avatar: str):
+        try:
+            self.user_repository.update_avatar(user_id, avatar)
+        except UserNotFoundError as error:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+
+

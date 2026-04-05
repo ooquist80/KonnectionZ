@@ -30,6 +30,15 @@ def update_me(change_password: bool,
     except UserNotFoundError as exception:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
 
+@router.put("/me/avatar", status_code=status.HTTP_202_ACCEPTED)
+def update_avatar(avatar: str,
+                  current_user: UserRead = Depends(get_current_user),
+                  user_service: UserService = Depends(get_user_service)):
+    try:
+        return user_service.update_avatar(current_user.id, avatar)
+    except UserNotFoundError as exception:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_user(payload: UserWrite,
                 user_service: UserService = Depends(get_user_service)) -> UserRead | None:

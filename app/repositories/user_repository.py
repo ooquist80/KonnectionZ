@@ -12,12 +12,13 @@ class UserRepository:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 scopes = "user:play"
+                avatar = f"https://api.dicebear.com/9.x/avataaars/svg?seed={user_write.username}"
                 cursor.execute(
                     """
-                    INSERT INTO users (email, username, password, scopes)
+                    INSERT INTO users (email, username, password, avatar, scopes)
                     VALUES (%s, %s, %s, %s)
                     """,
-                    (user_write.email, user_write.username, hashed_password, scopes)
+                    (user_write.email, user_write.username, hashed_password, avatar, scopes)
                 )
                 user_id = cursor.lastrowid
                 scopes.split(",")
@@ -29,7 +30,7 @@ class UserRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, email, username, scopes
+                    SELECT id, email, username, avatar, scopes
                     FROM users
                     WHERE id = %s
                     """,
@@ -40,14 +41,14 @@ class UserRepository:
         if user_row is None:
             return None
         scopes = user_row["scopes"].split(",")
-        return UserRead(id=user_row["id"], email=user_row["email"], username=user_row["username"], scopes=scopes)
+        return UserRead(id=user_row["id"], email=user_row["email"], username=user_row["username"], avatar=user_row["avatar"], scopes=scopes)
 
     def get_by_username(self, username) -> UserRecord:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, email, username, password, scopes
+                    SELECT id, email, username, avatar, password, scopes
                     FROM users
                     WHERE username = %s
                     """,
@@ -58,14 +59,15 @@ class UserRepository:
         if user_row is None:
             return None
         return UserRecord(id=user_row["id"], email=user_row["email"], username=user_row["username"],
-                          password=user_row["password"], scopes=user_row["scopes"].split(","))
+                          password=user_row["password"], avatar=user_row["avatar"],
+                          scopes=user_row["scopes"].split(","))
 
     def get_all(self) -> list[UserRead]:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, email, username, scopes
+                    SELECT id, email, username, avatar, scopes
                     FROM users
                     """
                 )
@@ -74,7 +76,7 @@ class UserRepository:
                 scopes = user_rows[0]["scopes"].split(",")
                 for user_row in user_rows:
                     users.append(UserRead(id=user_row["id"], email=user_row["email"], username=user_row["username"],
-                                          scopes=scopes))
+                                          avatar=user_row["avatar"] ,scopes=scopes))
             connection.commit()
         return users
 
@@ -90,7 +92,7 @@ class UserRepository:
             connection.commit()
         return
 
-    def update_by_id(self, user_id: int, user_write: UserWrite, hashed_password: str, change_passord: bool) -> UserRead:
+    def update_by_id(self, user_id: int, user_write: UserWrite, hashed_password: str, change_passord: bool) -> UserRead | None:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 if change_passord:
@@ -112,4 +114,20 @@ class UserRepository:
                 if cursor.rowcount == 0:
                     raise UserNotFoundError(f"User with id {user_id} was not found.")
             connection.commit()
-        return UserRead(id=user_id, email=user_write.email, username=user_write.username, scopes=user_write.scopes.split(","))
+        return self.get_by_id(user_id)
+
+    def update_avatar(self, user_id: int, new_avatar: str) -> None:
+        with self.database_client.connect() as connection:
+            with connection.cursor(cursor=DictCursor) as cursor:
+                cursor.execute(
+                    """
+                    UPDATE users
+                    SET avatar = %s
+                    WHERE id = %s
+                    """,
+                    (new_avatar, user_id)
+                )
+                if cursor.rowcount == 0:
+                    return None
+            connection.commit()
+        return True

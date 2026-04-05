@@ -11,6 +11,7 @@ class UserRead(BaseModel):
     id: int
     email: str
     username: str
+    avatar: str
     scopes: List[str]
 
 class UserWrite(BaseModel):
@@ -24,4 +25,5 @@ class UserRecord(BaseModel):
     email: str
     username: str
     password: str
+    avatar: str
     scopes: List[str]
