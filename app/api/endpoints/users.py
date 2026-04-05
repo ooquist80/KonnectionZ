@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status, Security
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
@@ -21,6 +20,15 @@ def get_user_service(database_client: DatabaseClient = Depends(get_database_clie
 def get_me(current_user: Annotated[UserRead, Depends(get_current_user)]) -> UserRead:
     return current_user
 
+@router.put("/me", status_code=status.HTTP_202_ACCEPTED)
+def update_me(change_password: bool,
+              user_write: UserWrite,
+              user_service: UserService = Depends(get_user_service),
+              current_user: UserRead = Depends(get_current_user)):
+    try:
+        return user_service.update(user_id=current_user.id, user_write=user_write, change_password=change_password)
+    except UserNotFoundError as exception:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=str(exception)) from exception
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_user(payload: UserWrite,

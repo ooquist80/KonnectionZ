@@ -13,10 +13,10 @@ class PlayRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT gs.id, gs.name, gs.daily, g.turn_count, g.start_time, g.end_time
+                    SELECT gs.id, gs.name, gs.daily, g.user_id, g.turn_count, g.start_time, g.end_time
                     FROM konnectionz.gamesets gs
-                    LEFT JOIN konnectionz.games g ON g.gameset_id = gs.id 
-                    WHERE g.user_id = %s OR g.user_id IS NULL;;
+                    LEFT JOIN konnectionz.games g 
+                    ON g.gameset_id = gs.id AND g.user_id = %s;
                     """, user_id)
                 rows = cursor.fetchall()
             connection.commit()
