@@ -12,18 +12,22 @@ class UserRepository:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 scopes = "user:play"
-                avatar = f"https://api.dicebear.com/9.x/avataaars/svg?seed={user_write.username}"
+                avatar = ('{"top":"shortFlat","hairColor":"a55728","accessories":"prescription02",'
+                          '"accessoriesColor":"3c4f5c","clothing":"shirtCrewNeck","clothesColor":"a7ffc4",'
+                          '"clothingGraphic":"diamond","eyes":"side","eyebrows":"default","mouth":"twinkle",'
+                          '"facialHair":null,"facialHairColor":"f59797","skinColor":"ffdbb4",'
+                          '"backgroundColor":"65c9ff"}')
                 cursor.execute(
                     """
                     INSERT INTO users (email, username, password, avatar, scopes)
-                    VALUES (%s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s)
                     """,
                     (user_write.email, user_write.username, hashed_password, avatar, scopes)
                 )
                 user_id = cursor.lastrowid
                 scopes.split(",")
             connection.commit()
-        return UserRead(id=user_id, email=user_write.email, username=user_write.username, scopes=scopes.split(","))
+        return UserRead(id=user_id, email=user_write.email, username=user_write.username, avatar=avatar ,scopes=scopes.split(","))
 
     def get_by_id(self, user_id: int) -> UserRead | None:
         with self.database_client.connect() as connection:

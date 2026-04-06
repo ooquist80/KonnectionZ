@@ -6,10 +6,13 @@ from pwdlib import PasswordHash
 from pymysql import IntegrityError
 from starlette import status
 
+from app.api.endpoints import announcement
 from app.db.client import DatabaseClient
 from app.core.config import get_settings
+from app.models.announcement import AnnouncementWrite
 from app.models.token import TokenData
 from app.models.user import UserRead, UserNotFoundError, UserWrite, UserRecord
+from app.repositories.announcement_repository import AnnouncementRepository
 from app.repositories.user_repository import UserRepository
 
 
@@ -17,6 +20,7 @@ class UserService:
 
     def __init__(self, database_client: DatabaseClient) -> None:
         self.user_repository = UserRepository(database_client)
+        self.announcement_repository = AnnouncementRepository(database_client)
         self.password_hasher = PasswordHash.recommended()
         self.settings = get_settings()
 
@@ -31,10 +35,12 @@ class UserService:
             elif error.args[0] == 1062 and "for key 'email'" in error.args[1]:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                     detail=f"User with email: {user_write.email} already exists.") from error
-        except Exception as error:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                detail="An unexpected error occurred while creating the user.") from error
         else:
+            announcement_write = AnnouncementWrite(
+                user_id=created_user.id,
+                content=f"New play signed up. Welcome {created_user.username}!"
+            )
+            self.announcement_repository.create_announcement(announcement_write)
             return created_user
 
     def get_by_id(self, user_id: int) -> UserRead:

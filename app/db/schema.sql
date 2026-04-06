@@ -28,9 +28,9 @@ CREATE TABLE IF NOT EXISTS words (
 
 CREATE TABLE IF NOT EXISTS gamesets (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `daily` tinyint(1) NOT NULL DEFAULT 0,
     `name` VARCHAR(255) NOT NULL,
-    `date` VARCHAR(255) NOT NULL
+    `date` VARCHAR(255) NOT NULL,
+    `daily_date` date DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS gamesets_wordsets (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS gamesets_wordsets (
 CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `email` VARCHAR(255) NOT NULL UNIQUE,
-    `avatar` VARCHAR(255) NOT NULL,
+    `avatar` VARCHAR(511) NOT NULL,
     `username` VARCHAR(255) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `scopes` VARCHAR(255) NOT NULL
@@ -55,8 +55,9 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS games (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `user_id` INT NOT NULL,
+    `dailygame` tinyint(1) NOT NULL,
     `gameset_id` INT NOT NULL,
-    `turn_count` INT DEFAULT 0,
+    `miss_count` INT DEFAULT 0,
     `start_time` DATETIME NOT NULL,
     `end_time` DATETIME,
     KEY `games_gamesets_FK` (`gameset_id`),
@@ -73,4 +74,11 @@ CREATE TABLE IF NOT EXISTS games_wordsets (
     KEY `games_wordsets_wordsets_FK` (`wordset_id`),
     CONSTRAINT `games_wordsets_games_FK` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`),
     CONSTRAINT `games_wordsets_wordsets_FK` FOREIGN KEY (`wordset_id`) REFERENCES `wordsets` (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS announcements (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` int(11) DEFAULT NULL,
+    `announced_at` datetime NOT NULL DEFAULT current_timestamp(),
+    `content` varchar(255) NOT NULL
 );
