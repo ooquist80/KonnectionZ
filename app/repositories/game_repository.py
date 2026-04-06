@@ -1,11 +1,11 @@
+from datetime import datetime
 from venv import logger
 
 from pymysql.cursors import DictCursor
-from datetime import datetime
-from app.models.game import GameRead, GameWrite
-from app.models.gameset import GameSetNotFoundError
-from app.models.wordset import WordsetRead
+
 from app.db.client import DatabaseClient
+from app.models.game import GameRead
+from app.models.gameset import GameSetNotFoundError
 from app.repositories.gameset_repository import GameSetRepository
 
 
@@ -15,7 +15,7 @@ class GameRepository:
         self.database_client = database_client
         self.gameset_repository = GameSetRepository(database_client)
 
-    def create(self, gameset_id: int, user_id: int) -> GameRead:
+    def create(self, gameset_id: int, user_id: int, dailygame) -> GameRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 gameset = self.gameset_repository.get_by_id(gameset_id)
@@ -24,15 +24,15 @@ class GameRepository:
                 start_time = datetime.now()
                 cursor.execute(
                     """
-                    INSERT INTO games (user_id, gameset_id, start_time)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO games (user_id, gameset_id, start_time, dailygame)
+                    VALUES (%s, %s, %s, %s)
                     """,
-                    (user_id, gameset_id, start_time)
+                    (user_id, gameset_id, start_time, dailygame)
                 )
                 game_id = cursor.lastrowid
             connection.commit()
 
-        return GameRead(id=game_id, user_id=user_id, gameset=gameset,
+        return GameRead(id=game_id, user_id=user_id, dailygame=dailygame, gameset=gameset,
                         start_time=start_time)
 
     def get_by_id(self, game_id) -> GameRead | None:
@@ -40,10 +40,10 @@ class GameRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, user_id, gameset_id, turn_count, start_time, end_time
+                    SELECT id, user_id, gameset_id, dailygame, miss_count, start_time, end_time
                     FROM games
                     WHERE id = %s
-                    """, (game_id,)
+                    """, game_id
                 )
                 game_row = cursor.fetchone()
                 if game_row is None:
@@ -65,7 +65,8 @@ class GameRepository:
         return GameRead(id=game_id,
                           user_id=game_row["user_id"],
                           gameset=gameset,
-                          turn_count=game_row["turn_count"],
+                          dailygame=game_row["dailygame"],
+                          miss_count=game_row["miss_count"],
                           start_time=game_row["start_time"],
                           end_time=game_row["end_time"],
                           completed_wordsets=completed_wordset_ids)
@@ -75,7 +76,7 @@ class GameRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, user_id, gameset_id, turn_count, start_time, end_time
+                    SELECT id, user_id, gameset_id, dailygame, miss_count, start_time, end_time
                     FROM games
                     WHERE user_id = %s
                     """, user_id
@@ -101,7 +102,8 @@ class GameRepository:
                         games.append(GameRead(id=game_row["id"],
                                               user_id=game_row["user_id"],
                                               gameset=gameset,
-                                              turn_count=game_row["turn_count"],
+                                              dailygame=game_row["dailygame"],
+                                              miss_count=game_row["miss_count"],
                                               start_time=game_row["start_time"],
                                               end_time=game_row["end_time"],
                                               completed_wordsets=completed_wordset_ids))
@@ -113,7 +115,7 @@ class GameRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, user_id, gameset_id, turn_count, start_time, end_time
+                    SELECT id, user_id, gameset_id, dailygame, miss_count, start_time, end_time
                     FROM games
                     """
                 )
@@ -138,7 +140,8 @@ class GameRepository:
                         games.append(GameRead(id=game_row["id"],
                                             user_id=game_row["user_id"],
                                             gameset=gameset,
-                                            turn_count=game_row["turn_count"],
+                                            dailygame=game_row["dailygame"],
+                                            miss_count=game_row["miss_count"],
                                             start_time=game_row["start_time"],
                                             end_time=game_row["end_time"],
                                             completed_wordsets=completed_wordset_ids))
@@ -170,13 +173,13 @@ class GameRepository:
                 )
             connection.commit()
 
-    def increment_turn_count(self, game_id) -> None:
+    def increment_miss_count(self, game_id) -> None:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
                     UPDATE games
-                    SET turn_count = turn_count + 1
+                    SET miss_count = miss_count + 1
                     WHERE id = %s
                     """,
                     game_id

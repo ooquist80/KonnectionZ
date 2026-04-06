@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from pymysql.cursors import DictCursor
 
@@ -12,15 +12,15 @@ class GameSetRepository:
         self.database_client = database_client
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create(self, date: datetime.datetime, daily: bool, name: str, wordset_ids: list[int]) -> GameSetRead:
+    def create(self, date: datetime, daily_date: datetime, name: str, wordset_ids: list[int]) -> GameSetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO gamesets (date, daily, name)
+                    INSERT INTO gamesets (date, daily_date, name)
                     VALUES (%s, %s, %s)
                     """,
-                    (date, daily, name)
+                    (date, daily_date, name)
                 )
                 game_id = cursor.lastrowid
                 data = [(game_id, wordset_id) for wordset_id in wordset_ids]
@@ -35,14 +35,14 @@ class GameSetRepository:
                 for wordset_id in wordset_ids:
                     wordsets.append(self.wordset_repository.get_by_id(wordset_id))
             connection.commit()
-        return GameSetRead(id=game_id, date=date, daily=daily, name=name, wordsets=wordsets)
+        return GameSetRead(id=game_id, date=date, daily_date=daily_date, name=name, wordsets=wordsets)
 
     def get_by_id(self, gameset_id: int) -> GameSetRead | None:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, daily, name, `date`
+                    SELECT id, daily_date, name, `date`
                     FROM gamesets
                     WHERE id = %s
                     """,
@@ -64,13 +64,13 @@ class GameSetRepository:
                 wordsets = []
                 for wordset_row in wordset_rows:
                     wordsets.append(self.wordset_repository.get_by_id(wordset_row["wordset_id"]))
-        return GameSetRead(id=gameset_row["id"], daily=bool(gameset_row["daily"]), date=gameset_row["date"], name=gameset_row["name"], wordsets=wordsets)
+        return GameSetRead(id=gameset_row["id"], daily_date=gameset_row["daily_date"], date=gameset_row["date"], name=gameset_row["name"], wordsets=wordsets)
 
     def get_all(self) -> list[GameSetRead]:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute("""
-                SELECT id, daily, name, date
+                SELECT id, daily_date, name, date
                 FROM gamesets
                 """)
                 gameset_rows = cursor.fetchall()
@@ -89,7 +89,7 @@ class GameSetRepository:
                     for wordset_id_row in wordset_id_rows:
                         wordsets.append(self.wordset_repository.get_by_id(wordset_id_row["wordset_id"]))
                     gamesets.append(GameSetRead(id=gameset_row["id"],
-                                                daily=bool(gameset_row["daily"]),
+                                                daily_date=gameset_row["daily_date"],
                                                 name=gameset_row["name"],
                                                 date=gameset_row["date"],
                                                 wordsets=wordsets))
@@ -124,11 +124,11 @@ class GameSetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute("""
                     SELECT id
-                    FROM gamesets
-                    WHERE daily = 1
-                    ORDER BY date DESC
+                    FROM gamesets                    
+                    ORDER BY daily_date DESC
                     LIMIT 1
                     """)
-                latest_daily_game_id=cursor.fetchone()["id"]
+                gameset_row = cursor.fetchone()
             connection.commit()
-        return latest_daily_game_id
+        #return gameset_row["id"]
+        return 1

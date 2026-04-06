@@ -14,8 +14,9 @@ class GameBelongsToAnotherUserError(Exception):
 class GameRead(BaseModel):
     id: int
     user_id: int
+    dailygame: bool
     gameset: GameSetRead
-    turn_count: int = 0
+    miss_count: int = 0
     start_time: datetime.datetime
     end_time: datetime.datetime | None = None
     completed_wordsets: list[int] = []

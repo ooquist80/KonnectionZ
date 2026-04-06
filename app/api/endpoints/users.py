@@ -46,13 +46,13 @@ def create_user(payload: UserWrite,
 
 @router.get("/")
 def get_all_users(user_service: UserService = Depends(get_user_service),
-                  current_user: UserRead = Security(get_current_user, scopes = ["user:admin"])) -> list[UserRead]:
+                  current_user: UserRead = Security(get_current_user, scopes = ["user:play"])) -> list[UserRead]:
     return user_service.get_all()
 
 @router.get("/{user_id}")
 def get_user(user_id: int,
              user_service: UserService = Depends(get_user_service),
-             current_user: UserRead = Security(get_current_user, scopes = ["user:admin"])) -> UserRead:
+             current_user: UserRead = Security(get_current_user, scopes = ["user:play"])) -> UserRead:
     try:
         return user_service.get_by_id(user_id)
     except UserNotFoundError as exception:

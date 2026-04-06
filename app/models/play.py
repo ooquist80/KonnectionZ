@@ -14,7 +14,7 @@ class GameStatus(BaseModel):
     end_time: datetime | None = None
     words_remaining: list[str]
     wordsets_completed: list[WordsetRead]
-    turn_count: int = 0
+    miss_count: int = 0
 
 class ResultMessage(str, Enum):
     COMPLETED = "Congratulations! You have completed the game."
@@ -30,8 +30,8 @@ class PlayResult(BaseModel):
 class PlayGameSet(BaseModel):
     id: int
     name: str
-    daily: bool
-    turn_count: int | None
+    daily_date: datetime | None
+    miss_count: int | None
     start_time: datetime | None
     end_time: datetime | None
 

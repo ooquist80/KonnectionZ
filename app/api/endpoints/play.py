@@ -37,13 +37,11 @@ def play_words(game_id: int,
                current_user: Annotated[UserRead, Depends(get_current_user)],
                play_service: PlayService = Depends(get_play_service)) -> PlayResult:
     try:
-        play_result = play_service.play_words(game_id, current_user.id, played_words)
+        play_result = play_service.play_words(game_id, current_user, played_words)
     except GameAlreadyCompletedError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc))
     except GameBelongsToAnotherUserError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
     return play_result
 
 @router.get("/gamesets")
@@ -51,3 +49,9 @@ def get_gamesets(current_user: UserRead = Depends(get_current_user),
                   play_service: PlayService = Depends(get_play_service)) -> list[PlayGameSet]:
     play_gamesets = play_service.get_available_gamesets(user_id=current_user.id)
     return play_gamesets
+
+@router.get("/gamesets/daily")
+def get_daily_gameset(current_user: UserRead = Depends(get_current_user),
+                      play_service: PlayService = Depends(get_play_service)) -> PlayGameSet:
+    daily_play_gameset = play_service.get_daily_play_gameset(current_user.id)
+    return daily_play_gameset
