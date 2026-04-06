@@ -36,29 +36,18 @@ class WordsetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, category, difficulty
-                    FROM wordsets
-                    WHERE id = %s
-                    """,
-                    wordset_id
+                    SELECT ws.id as wordset_id, ws.category, ws.difficulty, w.id as word_id, w.word 
+                    FROM konnectionz.wordsets ws
+                    JOIN konnectionz.words w ON ws.id = w.wordset_id 
+                    WHERE ws.id = %s;
+                    """, wordset_id
                 )
-                wordset_row = cursor.fetchone()
-                if not wordset_row:
-                    return None
-                cursor.execute(
-                    """
-                    SELECT id, word
-                    FROM words
-                    WHERE wordset_id = %s;
-                    """,
-                    wordset_id
-                )
-                word_rows = cursor.fetchall()
+                rows = cursor.fetchall()
                 words = []
-                for word_row in word_rows:
-                    words.append(WordRead(id=word_row["id"], word=word_row["word"]))
-                return WordsetRead(id=wordset_row["id"], category=wordset_row["category"],
-                                   difficulty=wordset_row["difficulty"], words=words)
+                for row in rows:
+                    words.append(WordRead(id=row["word_id"], word=row["word"]))
+                return WordsetRead(id=row["wordset_id"], category=row["category"],
+                                   difficulty=row["difficulty"], words=words)
 
     def get_all(self) -> list[WordsetRead]:
         with self.database_client.connect() as connection:
