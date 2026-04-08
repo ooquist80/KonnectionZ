@@ -3,12 +3,16 @@ services:
     image: mariadb:12.2.2
     environment:
       MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/mysql
     ports:
       - "3306:3306"
   web:
-    image: konnectionz-frontend:latest
+    image: kz-frontend:latest
     ports:
       - "80:80"
+    depends_on:
+      - api
   api:
     build:
       context: .
@@ -22,3 +26,5 @@ services:
       - "8080:8000"
     depends_on:
       - db
+volumes:
+  db_data:

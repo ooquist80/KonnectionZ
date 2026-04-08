@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS words (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `word` VARCHAR(255) NOT NULL,
     `wordset_id` INT NOT NULL,
-    KEY `words_wordsets_FK` (`wordset_id`),
+    KEY `words_wordsets_lookup_idx` (`wordset_id`, `id`),
     CONSTRAINT `words_wordsets_FK` FOREIGN KEY (`wordset_id`) REFERENCES `wordsets` (`id`)
 );
 
@@ -30,14 +30,15 @@ CREATE TABLE IF NOT EXISTS gamesets (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `date` VARCHAR(255) NOT NULL,
-    `daily_date` date DEFAULT NULL
+    `daily_date` date DEFAULT NULL,
+    KEY `gamesets_daily_date_idx` (`daily_date`)
 );
 
 CREATE TABLE IF NOT EXISTS gamesets_wordsets (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	gameset_id INT NOT NULL,
 	wordset_id INT NOT NULL,
-    KEY gamesets_wordsets_gamesets_FK (gameset_id),
+    KEY gamesets_wordsets_gamesets_lookup_idx (gameset_id, wordset_id),
     KEY gamesets_wordsets_wordsets_FK (wordset_id),
 	CONSTRAINT gamesets_wordsets_gamesets_FK FOREIGN KEY (gameset_id) REFERENCES konnectionz.gamesets(id),
 	CONSTRAINT gamesets_wordsets_wordsets_FK FOREIGN KEY (wordset_id) REFERENCES konnectionz.wordsets(id)
@@ -62,6 +63,7 @@ CREATE TABLE IF NOT EXISTS games (
     `end_time` DATETIME,
     KEY `games_gamesets_FK` (`gameset_id`),
     KEY `games_users_FK` (`user_id`),
+    KEY `games_user_gameset_lookup_idx` (`user_id`, `gameset_id`),
     CONSTRAINT `games_gamesets_FK` FOREIGN KEY (`gameset_id`) REFERENCES `gamesets` (`id`),
     CONSTRAINT `games_users_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 );
@@ -70,7 +72,7 @@ CREATE TABLE IF NOT EXISTS games_wordsets (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `game_id` INT NOT NULL,
     `wordset_id` INT NOT NULL,
-    KEY `games_wordsets_games_FK` (`game_id`),
+    KEY `games_wordsets_game_lookup_idx` (`game_id`, `wordset_id`),
     KEY `games_wordsets_wordsets_FK` (`wordset_id`),
     CONSTRAINT `games_wordsets_games_FK` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`),
     CONSTRAINT `games_wordsets_wordsets_FK` FOREIGN KEY (`wordset_id`) REFERENCES `wordsets` (`id`)
