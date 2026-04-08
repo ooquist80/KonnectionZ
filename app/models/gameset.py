@@ -15,6 +15,6 @@ class GameSetRead(BaseModel):
 
 class GameSetWrite(BaseModel):
     date: datetime.datetime = datetime.datetime.now()
-    daily_date: datetime.datetime
+    daily_date: datetime.datetime | None = None
     name: str = Field(title="The name of the game")
     wordsets: list[int] = Field(min_length=4)

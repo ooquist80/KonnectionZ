@@ -20,9 +20,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
     app.include_router(api_router)
-    origins = [
-        "http://localhost:5173",
-    ]
+    origins = settings.allowed_origins
     # noinspection PyTypeChecker
     app.add_middleware(CORSMiddleware,
                        allow_origins=origins,

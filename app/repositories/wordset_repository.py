@@ -31,7 +31,7 @@ class WordsetRepository:
 
         return self.get_by_id(wordset_id)
 
-    def get_by_id(self, wordset_id: int) -> WordsetRead | None:
+    def get_by_id(self, wordset_id: int) -> WordsetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -43,6 +43,8 @@ class WordsetRepository:
                     """, wordset_id
                 )
                 rows = cursor.fetchall()
+                if not rows:
+                    raise WordsetNotFoundError(f"Could not find wordset with id {wordset_id}")
                 words = []
                 for row in rows:
                     words.append(WordRead(id=row["word_id"], word=row["word"]))
@@ -52,6 +54,13 @@ class WordsetRepository:
     def get_all(self) -> list[WordsetRead]:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
+                # TODO replace with this query
+                # """
+                # SELECT ws.id as wordset_id, ws.category, ws.difficulty, w.id as word_id, w.word
+                # FROM wordsets ws
+                # JOIN words w ON ws.id = w.wordset_id;
+                # """
+
                 cursor.execute(
                     """
                     SELECT id,

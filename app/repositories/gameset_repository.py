@@ -12,7 +12,7 @@ class GameSetRepository:
         self.database_client = database_client
         self.wordset_repository = WordsetRepository(database_client)
 
-    def create(self, date: datetime, daily_date: datetime, name: str, wordset_ids: list[int]) -> GameSetRead:
+    def create(self, date: datetime, daily_date: datetime | None, name: str, wordset_ids: list[int]) -> GameSetRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
@@ -124,11 +124,11 @@ class GameSetRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute("""
                     SELECT id
-                    FROM gamesets                    
+                    FROM gamesets
+                    WHERE daily_date IS NOT NULL
                     ORDER BY daily_date DESC
                     LIMIT 1
                     """)
                 gameset_row = cursor.fetchone()
             connection.commit()
-        #return gameset_row["id"]
-        return 1
+        return gameset_row["id"]

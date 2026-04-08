@@ -5,3 +5,20 @@ services:
       MYSQL_ROOT_PASSWORD: password
     ports:
       - "3306:3306"
+  web:
+    image: konnectionz-frontend:latest
+    ports:
+      - "80:80"
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: password
+      ALLOWED_ORIGINS: http://localhost
+    ports:
+      - "8080:8000"
+    depends_on:
+      - db
