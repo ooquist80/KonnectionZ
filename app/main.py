@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.config import get_settings
+from app.core.logging import setup_logging
 from app.db.client import DatabaseClient
 
 
@@ -18,6 +19,7 @@ async def lifespan(_: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    setup_logging(production=settings.environment == "production")
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
     app.include_router(api_router)
     origins = settings.allowed_origins

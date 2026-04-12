@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta, datetime, timezone
 
 import jwt
@@ -8,9 +9,10 @@ from starlette import status
 from app.api.deps import verify_password
 from app.core.config import get_settings
 from app.models.token import Token
-from app.models.user import UserNotFoundError
 from ..db.client import DatabaseClient
 from ..repositories.user_repository import UserRepository
+
+logger = logging.getLogger(__name__)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 settings = get_settings()
@@ -36,7 +38,10 @@ class AuthService:
     def authenticate_user(self, username: str, password: str):
         try:
             user_record = self.user_repository.get_by_username(username)
-        except UserNotFoundError:
+        except Exception as e:
+            logger.error(f"Error while authenticating user {username}: {e}", exc_info=True)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if user_record is None:
             return False
         if not verify_password(password, user_record.password):
             return False

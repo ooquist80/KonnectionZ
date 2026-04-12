@@ -1,6 +1,9 @@
-from datetime import datetime
 import random
+from datetime import datetime
 from typing import Any
+
+from fastapi import HTTPException
+from starlette import status
 
 from app.db.client import DatabaseClient
 from app.models.announcement import AnnouncementWrite
@@ -44,7 +47,10 @@ class PlayService:
 
     def start_or_resume_daily_game(self, user_id: int):
         daily_gameset_id = self.gameset_repository.get_latest_daily_gameset_id()
-        return self.start_or_resume_game(user_id=user_id, gameset_id=daily_gameset_id, dailygame=True)
+        if daily_gameset_id:
+            return self.start_or_resume_game(user_id=user_id, gameset_id=daily_gameset_id, dailygame=True)
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No daily game found.")
 
     def start_or_resume_game(self, user_id: int, gameset_id : int, dailygame: bool = False) -> PlayResult:
         played_games = self.game_repository.get_by_user_id(user_id=user_id)
@@ -128,6 +134,10 @@ class PlayService:
 
     def get_daily_play_gameset(self, user_id: int) -> PlayGameSet:
         daily_game_id = self.gameset_repository.get_latest_daily_gameset_id()
-        return self.play_repository.get_play_gameset_by_id(user_id=user_id,
+        if daily_game_id:
+            return self.play_repository.get_play_gameset_by_id(user_id=user_id,
                                                            daily_game_id=daily_game_id)
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No daily game available")
+
 

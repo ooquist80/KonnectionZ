@@ -53,6 +53,7 @@ class GameRepository:
                     SELECT wordset_id 
                     FROM games_wordsets 
                     WHERE game_id = %s
+                    ORDER BY id;
                     """, (game_row["id"],)
                 )
                 wordset_rows = cursor.fetchall()

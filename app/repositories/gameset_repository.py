@@ -119,7 +119,7 @@ class GameSetRepository:
                 connection.rollback()
                 raise GameSetNotFoundError(gameset_id)
 
-    def get_latest_daily_gameset_id(self) -> int:
+    def get_latest_daily_gameset_id(self) -> int | None:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute("""
@@ -129,6 +129,8 @@ class GameSetRepository:
                     ORDER BY daily_date DESC
                     LIMIT 1
                     """)
+                if cursor.rowcount == 0:
+                    return None
                 gameset_row = cursor.fetchone()
             connection.commit()
         return gameset_row["id"]
