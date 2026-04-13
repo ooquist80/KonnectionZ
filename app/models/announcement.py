@@ -7,6 +7,7 @@ class AnnouncementRead(BaseModel):
     user_id: int | None
     announced_at: datetime
     content: str
+    comment_count: int = 0
 
 class AnnouncementWrite(BaseModel):
     user_id: int

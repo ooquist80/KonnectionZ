@@ -31,8 +31,11 @@ class AnnouncementRepository:
             with connection.cursor(cursor=DictCursor) as cursor:
                 cursor.execute(
                     """
-                    SELECT id, user_id, announced_at, content
-                    FROM announcements
+                    SELECT a.id, a.user_id, a.announced_at, a.content, COUNT(c.id) comment_count
+                    FROM konnectionz.announcements a
+                    LEFT OUTER JOIN comments c ON a.id = c.announcement_id 
+                    GROUP BY id
+                    ORDER BY id DESC;
                     """)
                 announcement_rows = cursor.fetchall()
                 announcements = []
@@ -40,5 +43,6 @@ class AnnouncementRepository:
                     announcements.append(AnnouncementRead(id=announcement_row["id"],
                                                           user_id=announcement_row["user_id"],
                                                           announced_at=announcement_row["announced_at"],
-                                                          content=announcement_row["content"]))
+                                                          content=announcement_row["content"],
+                                                          comment_count=announcement_row["comment_count"]))
                 return announcements

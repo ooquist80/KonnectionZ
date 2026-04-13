@@ -6,9 +6,8 @@ from pwdlib import PasswordHash
 from pymysql import IntegrityError
 from starlette import status
 
-from app.api.endpoints import announcement
-from app.db.client import DatabaseClient
 from app.core.config import get_settings
+from app.db.client import DatabaseClient
 from app.models.announcement import AnnouncementWrite
 from app.models.token import TokenData
 from app.models.user import UserRead, UserNotFoundError, UserWrite, UserRecord
@@ -38,7 +37,7 @@ class UserService:
         else:
             announcement_write = AnnouncementWrite(
                 user_id=created_user.id,
-                content=f"New play signed up. Welcome {created_user.username}!"
+                content=f"New player signed up. Welcome {created_user.username}!"
             )
             self.announcement_repository.create_announcement(announcement_write)
             return created_user
