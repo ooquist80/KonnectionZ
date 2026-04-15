@@ -11,7 +11,7 @@ from app.services.user_service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="auth/token",
-    scopes={"user:play": "Can play games", "user:admin": "Can administer games"}
+    scopes={"user:player": "Can play games", "user:gamemaster": "Can create Gamesets", "user:admin": "Can administer games and users"}
 )
 
 password_hasher = PasswordHash.recommended()

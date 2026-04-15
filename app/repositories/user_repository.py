@@ -11,7 +11,7 @@ class UserRepository:
     def create(self, user_write : UserWrite, hashed_password: str) -> UserRead:
         with self.database_client.connect() as connection:
             with connection.cursor(cursor=DictCursor) as cursor:
-                scopes = "user:play"
+                scopes = "user:player"
                 avatar = ('{"top":"shortFlat","hairColor":"a55728","accessories":"prescription02",'
                           '"accessoriesColor":"3c4f5c","clothing":"shirtCrewNeck","clothesColor":"a7ffc4",'
                           '"clothingGraphic":"diamond","eyes":"side","eyebrows":"default","mouth":"twinkle",'

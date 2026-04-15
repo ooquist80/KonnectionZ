@@ -51,9 +51,9 @@ class GameRepository:
                 cursor.execute(
                     """
                     SELECT wordset_id 
-                    FROM games_wordsets 
+                    FROM games_wordsets gw
                     WHERE game_id = %s
-                    ORDER BY id;
+                    ORDER BY gw.id;
                     """, (game_row["id"],)
                 )
                 wordset_rows = cursor.fetchall()

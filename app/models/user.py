@@ -18,7 +18,7 @@ class UserWrite(BaseModel):
     email: EmailStr
     username: str
     password: str
-    scopes: str = "user:play"
+    scopes: str = "user:player"
 
 class UserRecord(BaseModel):
     id: int
