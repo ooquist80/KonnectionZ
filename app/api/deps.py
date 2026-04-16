@@ -7,6 +7,7 @@ from pwdlib import PasswordHash
 from app.core.config import Settings, get_settings
 from app.db.client import DatabaseClient
 from app.models.user import UserRead
+from app.services.gemini_service import GeminiService
 from app.services.user_service import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -19,6 +20,8 @@ password_hasher = PasswordHash.recommended()
 def get_database_client(settings: Settings = Depends(get_settings)) -> DatabaseClient:
     return DatabaseClient(settings)
 
+def get_gemini_service(settings: Settings = Depends(get_settings)) -> GeminiService:
+    return GeminiService(settings.gemini_api_key, get_database_client())
 
 def get_user_service(database_client: DatabaseClient = Depends(get_database_client)) -> UserService:
     return UserService(database_client)

@@ -8,12 +8,16 @@ from app.db.client import DatabaseClient
 from app.models.gameset import GameSetRead, GameSetWrite
 from app.models.user import UserRead
 from app.services.gameset_service import GameSetService, GameSetNotFoundError
+from app.services.gemini_service import GeminiService
 
 router = APIRouter(prefix="/gamesets", tags=["gamesets"])
 
 
 def get_gameset_service(database_client: DatabaseClient = Depends(get_database_client)) -> GameSetService:
     return GameSetService(database_client)
+
+def get_gemini_service(database_client: DatabaseClient = Depends(get_database_client)) -> GeminiService:
+    return GeminiService(database_client)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -23,6 +27,12 @@ def create_gameset(payload: GameSetWrite,
                    ) -> GameSetRead:
     return gameset_service.create_gameset(payload)
 
+
+@router.post("/ai/", status_code=status.HTTP_201_CREATED)
+def create_gameset_using_ai(gemini_service: GeminiService = Depends(get_gemini_service)) -> GameSetRead:
+    gameset_read = gemini_service.create_full_gameset("sv")
+
+    return gameset_read
 
 @router.get("/{gameset_id}", status_code=status.HTTP_200_OK)
 def get_gameset(gameset_id: int,

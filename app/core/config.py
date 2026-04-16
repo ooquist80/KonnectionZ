@@ -17,6 +17,7 @@ class Settings:
     access_token_algorithm : str
     allowed_origins : list[str]
     environment: str
+    gemini_api_key: str
 
 
 def _as_bool(value: str | None, *, default: bool = False) -> bool:
@@ -42,5 +43,6 @@ def get_settings() -> Settings:
                                         "c083e980e6a9a9a5a9d9ed274c2a6120b9e05335a87f37649bf259885177f4c8"),
         access_token_expires_in=int(os.getenv("ACCESS_TOKEN_EXPIRES_IN", 60*12)),
         access_token_algorithm=os.getenv("ACCESS_TOKEN_ALGORITHM","HS256"),
-        allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.0.5:5173").split(",")
+        allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.0.5:5173").split(","),
+        gemini_api_key = os.getenv("GEMINI_API_KEY", "secret")
     )
